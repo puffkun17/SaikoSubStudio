@@ -1,147 +1,104 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStudioStore } from '@/store/useStudioStore';
-import { SubRow } from '@/types/subtitleTypes';
-import JSZip from 'jszip';
+import { generateSrtContent, generateAssContent } from '@/utils/subtitleCore';
 
-interface ExportDropdownProps {
-  variant?: 'gold' | 'ghost';
-}
+/**
+ * #16 — Shared export hook to avoid duplication in WorkbenchStep + TheaterStep
+ */
+export const useExport = () => {
+  const { processedSubs, customFilename, customStyle, addLog } = useStudioStore();
 
-function msToSrtTime(ms: number): string {
-  const date = new Date(ms);
-  const hh = String(date.getUTCHours()).padStart(2, '0');
-  const mm = String(date.getUTCMinutes()).padStart(2, '0');
-  const ss = String(date.getUTCSeconds()).padStart(2, '0');
-  const mss = String(date.getUTCMilliseconds()).padStart(3, '0');
-  return `${hh}:${mm}:${ss},${mss}`;
-}
-
-function subsToSrt(subs: SubRow[]): string {
-  return subs
-    .map((sub, i) => {
-      const [start, end] = sub.ts.split(' --> ').map(t => {
-        // assume already in good format or convert
-        return t.trim();
-      });
-      return `${i + 1}\n${start} --> ${end}\n${sub.text}\n`;
-    })
-    .join('\n');
-}
-
-function subsToAss(subs: SubRow[], style: any): string {
-  const header = `[Script Info]
-Title: SubStudio Export
-ScriptType: v4.00+
-Collisions: Normal
-PlayDepth: 0
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,${style?.zhFont || 'Arial'},${style?.zhFontSize || 48},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,10,1
-
-[Events]
-Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-`;
-
-  const events = subs.map(sub => {
-    const [start, end] = sub.ts.split(' --> ');
-    const text = sub.text.replace(/\n/g, '\\N');
-    return `Dialogue: 0,${start.replace(',', '.')},${end.replace(',', '.')},Default,,0,0,0,,${text}`;
-  }).join('\n');
-
-  return header + events;
-}
-
-export const ExportDropdown: React.FC<ExportDropdownProps> = ({ variant = 'ghost' }) => {
-  const [open, setOpen] = useState(false);
-  const { processedSubs, customFilename, addLog, customStyle } = useStudioStore();
-
-  const filename = customFilename || 'subtitles';
-
-  const handleExport = async (format: 'srt' | 'ass' | 'both') => {
-    if (!processedSubs || processedSubs.length === 0) {
-      addLog('No subtitles to export', 'error');
-      setOpen(false);
-      return;
-    }
-
+  const handleDownload = (format: 'ass' | 'srt') => {
+    if (!processedSubs || processedSubs.length === 0) return;
     try {
+      let content = '';
+      let mimeType = 'text/plain';
+      let extension = '';
+
       if (format === 'srt') {
-        const content = subsToSrt(processedSubs);
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}.srt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        addLog('Exported as SRT', 'success');
-      } else if (format === 'ass') {
-        const content = subsToAss(processedSubs, customStyle);
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}.ass`;
-        a.click();
-        URL.revokeObjectURL(url);
-        addLog('Exported as ASS', 'success');
-      } else if (format === 'both') {
-        const zip = new JSZip();
-        zip.file(`${filename}.srt`, subsToSrt(processedSubs));
-        zip.file(`${filename}.ass`, subsToAss(processedSubs, customStyle));
-        const blob = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}.zip`;
-        a.click();
-        URL.revokeObjectURL(url);
-        addLog('Exported as ZIP (SRT + ASS)', 'success');
+        content = generateSrtContent(processedSubs);
+        mimeType = 'text/srt';
+        extension = 'srt';
+      } else {
+        content = generateAssContent(processedSubs, customStyle, customFilename);
+        mimeType = 'text/x-ass';
+        extension = 'ass';
       }
-    } catch (e) {
-      addLog('Export failed', 'error');
-      console.error(e);
+
+      const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${customFilename || 'subtitles'}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      addLog(`导出成功: ${format.toUpperCase()} 格式`, 'success');
+    } catch (e: any) {
+      addLog(`导出失败: ${e.message}`, 'error');
     }
-    setOpen(false);
   };
 
-  const baseClass = variant === 'gold' 
-    ? 'px-4 py-2 rounded-xl bg-amber-400 text-black font-medium text-sm flex items-center gap-2 hover:bg-amber-300 transition'
-    : 'px-3 py-1.5 rounded-lg border border-white/20 text-xs hover:bg-white/5 flex items-center gap-2';
+  return { handleDownload };
+};
+
+/**
+ * #9 — Export dropdown that closes on outside click
+ */
+export const ExportDropdown: React.FC<{ variant?: 'gold' | 'ghost' }> = ({ variant = 'gold' }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const { handleDownload } = useExport();
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const goldClass = 'py-1.5 px-3 md:py-2 md:px-4 bg-accent-gold hover:bg-accent-gold/90 text-black font-bold text-xs md:text-sm rounded-lg flex items-center gap-1.5 transition-all';
+  const ghostClass = 'py-2.5 px-4 bg-accent-gold hover:bg-accent-gold/90 text-black font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all';
 
   return (
-    <div className="relative inline-block">
+    <div className="relative" ref={ref}>
       <button
+        className={variant === 'gold' ? goldClass : ghostClass}
         onClick={() => setOpen(!open)}
-        className={baseClass}
-        aria-haspopup="true"
       >
-        Export
-        <span className="text-[10px]">▼</span>
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        导出
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 rounded-xl border border-white/10 bg-[#111113] shadow-xl z-[100] overflow-hidden text-sm">
-          <button 
-            onClick={() => handleExport('srt')} 
-            className="w-full text-left px-4 py-2.5 hover:bg-white/5 flex items-center gap-2"
+        <div className="absolute top-full right-0 mt-1.5 bg-[#121216] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 min-w-[140px] animate-in fade-in slide-in-from-top-1 duration-150">
+          <button
+            className="w-full py-3 px-4 text-xs font-semibold hover:bg-white/5 text-left border-b border-white/5 transition text-white/80 hover:text-white flex items-center gap-2"
+            onClick={() => { handleDownload('ass'); setOpen(false); }}
           >
-            Export SRT
+            <span className="font-mono text-accent-gold text-[10px] bg-accent-gold/10 px-1.5 py-0.5 rounded">ASS</span>
+            ASS 格式 (.ass)
           </button>
-          <button 
-            onClick={() => handleExport('ass')} 
-            className="w-full text-left px-4 py-2.5 hover:bg-white/5 flex items-center gap-2 border-t border-white/10"
+          <button
+            className="w-full py-3 px-4 text-xs font-semibold hover:bg-white/5 text-left transition text-white/80 hover:text-white flex items-center gap-2"
+            onClick={() => { handleDownload('srt'); setOpen(false); }}
           >
-            Export ASS (styled)
-          </button>
-          <button 
-            onClick={() => handleExport('both')} 
-            className="w-full text-left px-4 py-2.5 hover:bg-white/5 flex items-center gap-2 border-t border-white/10 text-amber-400"
-          >
-            Export ZIP (both)
+            <span className="font-mono text-white/50 text-[10px] bg-white/5 px-1.5 py-0.5 rounded">SRT</span>
+            SRT 格式 (.srt)
           </button>
         </div>
       )}
