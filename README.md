@@ -36,6 +36,12 @@ Basic workflow:
 - Framer Motion
 - Tailwind CSS
 
+## Version Notes
+
+**Downgraded for Cloudflare compatibility**: Next.js has been temporarily downgraded to 15.5.2 (from 16.x) because `@cloudflare/next-on-pages` (as of v1.13.x) has a peer dependency that only supports Next.js <= 15.5.2.
+
+**Reminder**: When a newer version of `@cloudflare/next-on-pages` with proper Next.js 16+ support is released, upgrade back to the latest Next.js and remove any legacy-peer-deps workarounds.
+
 ## Deployment on Cloudflare Pages
 
 This project is set up for Cloudflare Pages.
@@ -43,6 +49,8 @@ This project is set up for Cloudflare Pages.
 **Build settings:**
 - Build command: `npm ci && npm run pages:build`
 - Build output directory: `.vercel/output/static`
+
+(Note: This works cleanly after the temporary Next.js 15.5.2 downgrade.)
 
 Local preview:
 ```bash
