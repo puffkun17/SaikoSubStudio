@@ -36,7 +36,12 @@ Basic workflow:
 - Framer Motion
 - Tailwind CSS
 
-## Version Notes
+## Version Notes / Releases
+
+**v1.0.1** (2025-06 local release)
+- Local version with newer feature iterations and refinements, extracted and integrated from the NAS SaikoBasement 1.0beta deployment (source: NAS `/volume1/web/saikobasement_prod`).
+- Includes cleanup of sync backup files and dev artifacts for cleaner GitHub/CF Pages state.
+- This is the active development line going forward. The full SaikoBasement remains only as static site on Synology NAS for archival/remote reference. Local PlayGround/SaikoBasement copy archived/removed from dev workspace.
 
 **Downgraded for Cloudflare compatibility**: Next.js has been temporarily downgraded to 15.5.2 (from 16.x) because `@cloudflare/next-on-pages` (as of v1.13.x) has a peer dependency that only supports Next.js <= 15.5.2.
 
