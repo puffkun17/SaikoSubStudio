@@ -5,6 +5,13 @@ on:
     branches: [ main ]
   workflow_dispatch:   # Allow manual trigger from GitHub UI
 
+# Temporary opt-out for Node.js 20 actions deprecation warning.
+# GitHub is forcing Node 24 on actions starting mid-June 2026.
+# We keep Node 20 for now because the project pins Next.js 15.5.2 + @cloudflare/next-on-pages for compatibility.
+# Remove this env (or set FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true) once the project is upgraded.
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -22,7 +29,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # --legacy-peer-deps matches the project's historical workaround for CF adapter + Next 15
+        run: npm ci --legacy-peer-deps
 
       - name: Build for Cloudflare Pages
         run: npm run pages:build
@@ -33,6 +41,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: pages deploy .vercel/output/static --project-name=saikosubstudio
         # Tip: Create a Cloudflare API token with "Pages:Edit" permission and add it as repo secret.
+        # If this step fails with auth error, the secret is missing or has insufficient scope.
 
       - name: Deployment URL
         run: echo "Deployed! Check your Cloudflare Pages dashboard or the URL in the step above."
