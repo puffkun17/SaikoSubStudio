@@ -57,11 +57,27 @@ This project is set up for Cloudflare Pages.
 
 (Note: This works cleanly after the temporary Next.js 15.5.2 downgrade.)
 
+### Local / Manual Deploy
+```bash
+cd /Users/nexus/SaikoSubStudio
+npm ci
+npm run deploy:pages
+# or manually:
+# npm run pages:build
+# npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
+```
+
 Local preview:
 ```bash
 npm run pages:build
 npm run preview
 ```
+
+### Automated Deploy (recommended)
+- Push to `main` (or use "Run workflow" in GitHub Actions tab) triggers `.github/workflows/deploy.yml`
+- Requires a repository secret named `CLOUDFLARE_API_TOKEN` (create in Cloudflare Dashboard → My Profile → API Tokens with "Pages:Edit" permission, then add in GitHub repo Settings → Secrets and variables → Actions).
+
+See the workflow file for details and customization (e.g. preview deployments on PRs).
 
 ## License
 
