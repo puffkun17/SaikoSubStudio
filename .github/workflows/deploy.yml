@@ -59,29 +59,24 @@ jobs:
       # for better error logs and to avoid action-internal npx issues.
       # This also makes the command use the Node version we just set up.
       - name: Deploy to Cloudflare Pages
-        run: |
-          if [ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            npx wrangler pages deploy .vercel/output/static \
-              --project-name=saikosubstudio \
-              --account-id "$CLOUDFLARE_ACCOUNT_ID"
-          else
-            npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
-          fi
+        # We use the direct `npx wrangler` command (from devDependencies) instead of the official action.
+        # This gives clearer logs.
+        #
+        # Wrangler picks up CLOUDFLARE_ACCOUNT_ID automatically from the environment if set.
+        # Do NOT pass --account-id on the command line for `pages deploy` — it is not a supported flag
+        # for this subcommand (hence the "Unknown arguments: account-id" error).
+        run: npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || '' }}
-        # IMPORTANT: The API token needs these minimum permissions (this exact error is very common):
-        #   - User  → User Details → Read
-        #   - Account → Pages → Edit   (strongly recommended to scope it to the correct account only)
+        # The API token MUST have these permissions:
+        #   - User  → User Details → Read     (required to avoid /memberships auth errors)
+        #   - Account → Pages → Edit          (the main permission for deploying)
         #
-        # "Pages:Edit" alone is often NOT enough — Wrangler calls /memberships which requires User Details Read.
+        # When creating the token, scope it to the specific account (don't use "All accounts").
         #
-        # How to create the token:
-        # 1. https://dash.cloudflare.com/profile/api-tokens → Create Custom token
-        # 2. Add the two permissions listed above
-        # 3. Under "Account Resources", choose the specific account that owns your Pages project (don't use "All accounts")
-        # 4. Create + copy the token
-        # 5. In GitHub: repo Settings → Secrets and variables → Actions → New repository secret
+        # If you also create a secret called CLOUDFLARE_ACCOUNT_ID (the 32-char account ID from the dashboard),
+        # Wrangler will use it automatically via the env var above. This is optional but recommended.
         #    Name:  CLOUDFLARE_API_TOKEN
         #    Value: the token
         #
