@@ -5,10 +5,14 @@ on:
     branches: [ main ]
   workflow_dispatch:   # Allow manual trigger from GitHub UI
 
-# Temporary opt-out for Node.js 20 actions deprecation warning.
-# GitHub is forcing Node 24 on actions starting mid-June 2026.
-# We keep Node 20 for now because the project pins Next.js 15.5.2 + @cloudflare/next-on-pages for compatibility.
-# Remove this env (or set FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true) once the project is upgraded.
+# Node.js 20 deprecation handling (GitHub Actions runner).
+# GitHub is deprecating Node 20 for action execution (forced Node 24 from mid-2026).
+# We use the unsecure opt-out temporarily because the project is pinned to
+# Next.js 15.5.2 + @cloudflare/next-on-pages ^1.13 for Cloudflare compatibility.
+# See: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+#
+# When the CF adapter supports newer Next.js + Node 24, remove the env below
+# and consider upgrading node-version here + removing --legacy-peer-deps.
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
@@ -29,19 +33,25 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        # --legacy-peer-deps matches the project's historical workaround for CF adapter + Next 15
+        # --legacy-peer-deps is required for compatibility with current
+        # @cloudflare/next-on-pages + Next 15.5.2 pin.
         run: npm ci --legacy-peer-deps
 
       - name: Build for Cloudflare Pages
         run: npm run pages:build
 
+      # Use direct wrangler (from devDependencies) instead of wrangler-action
+      # for better error logs and to avoid action-internal npx issues.
+      # This also makes the command use the Node version we just set up.
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy .vercel/output/static --project-name=saikosubstudio
-        # Tip: Create a Cloudflare API token with "Pages:Edit" permission and add it as repo secret.
-        # If this step fails with auth error, the secret is missing or has insufficient scope.
+        run: npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        # Required secret: CLOUDFLARE_API_TOKEN with "Pages:Edit" scope.
+        # If you see auth errors, create the secret in repo Settings → Secrets and variables → Actions.
 
-      - name: Deployment URL
-        run: echo "Deployed! Check your Cloudflare Pages dashboard or the URL in the step above."
+      - name: Deployment info
+        run: |
+          echo "✅ Deployment step completed."
+          echo "Check the Cloudflare Pages dashboard for the live URL."
+          echo "Project: saikosubstudio"
