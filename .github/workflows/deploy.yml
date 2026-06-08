@@ -6,15 +6,15 @@ on:
   workflow_dispatch:   # Allow manual trigger from GitHub UI
 
 # Node.js 20 deprecation handling (GitHub Actions runner).
-# GitHub is deprecating Node 20 for action execution (forced Node 24 from mid-2026).
-# We use the unsecure opt-out temporarily because the project is pinned to
-# Next.js 15.5.2 + @cloudflare/next-on-pages ^1.13 for Cloudflare compatibility.
+# GitHub is deprecating Node 20 for action execution.
+# We opt into Node 24 for the actions themselves using FORCE_JAVASCRIPT_ACTIONS_TO_NODE24.
+# The actual build still uses Node 20 (via setup-node) because the project pins
+# Next.js 15.5.2 + @cloudflare/next-on-pages ^1.13.5 for Cloudflare compatibility.
 # See: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
 #
-# When the CF adapter supports newer Next.js + Node 24, remove the env below
-# and consider upgrading node-version here + removing --legacy-peer-deps.
+# Long term: upgrade the CF adapter + Next.js so we can use modern Node for everything.
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
@@ -39,6 +39,21 @@ jobs:
 
       - name: Build for Cloudflare Pages
         run: npm run pages:build
+
+      - name: Verify Cloudflare build output
+        run: |
+          echo "Checking for .vercel/output/static ..."
+          if [ ! -d ".vercel/output/static" ]; then
+            echo "❌ ERROR: .vercel/output/static directory not found after pages:build"
+            echo "Contents of .vercel/output (if any):"
+            ls -la .vercel/output/ 2>/dev/null || echo "(no .vercel/output dir)"
+            echo "This usually means the @cloudflare/next-on-pages build failed."
+            echo "Check the 'Build for Cloudflare Pages' step logs above for the real error."
+            exit 1
+          fi
+          echo "✅ Build output directory exists"
+          echo "Top level contents:"
+          ls -la .vercel/output/static | head -30
 
       # Use direct wrangler (from devDependencies) instead of wrangler-action
       # for better error logs and to avoid action-internal npx issues.
