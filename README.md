@@ -62,24 +62,22 @@ This project is set up for Cloudflare Pages.
 - The `CLOUDFLARE_API_TOKEN` you configured as a **GitHub Repository Secret** is only used by GitHub Actions (for automatic deploys on `git push`).
 - When running deploy commands **directly on your local Mac**, wrangler needs its own authentication (separate from the GitHub secret).
 
-**Easiest way (recommended for local):**
+**Easiest way (recommended for local development):**
 ```bash
-cd /Users/nexus/SaikoSubStudio
-npm ci
-npx wrangler login          # Opens browser for one-time OAuth login (do this once)
+npx wrangler login          # One-time browser login
 npm run deploy:pages
 ```
 
-**Alternative (using the same token value as your GitHub secret):**
+**Using an API token (for scripts or CI-like local runs):**
 ```bash
 export CLOUDFLARE_API_TOKEN=你的token值
+export CLOUDFLARE_ACCOUNT_ID=你的账号ID     # strongly recommended
 npm run deploy:pages
 ```
 
-Or manually:
+Manual one-liner:
 ```bash
-npm run pages:build
-npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
+npm run pages:build && npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
 ```
 
 **Note:** The `pages:build` step works without any token. The token is only required for the actual `wrangler pages deploy` upload.
@@ -92,7 +90,22 @@ npm run preview
 
 ### Automated Deploy (recommended)
 - Push to `main` (or use "Run workflow" in GitHub Actions tab) triggers `.github/workflows/deploy.yml`
-- Requires a repository secret named `CLOUDFLARE_API_TOKEN` (create in Cloudflare Dashboard → My Profile → API Tokens with "Pages:Edit" permission, then add in GitHub repo Settings → Secrets and variables → Actions).
+- Requires a repository secret named `CLOUDFLARE_API_TOKEN`.
+  The token **must** have at minimum these permissions:
+  - **User → User Details → Read**
+  - **Account → Pages → Edit** (strongly recommended to scope it to the specific account)
+
+  "Pages:Edit" alone is frequently **not enough** — Wrangler calls the `/memberships` endpoint which requires the User Details Read permission.
+
+  **How to create the correct token**:
+  1. Go to https://dash.cloudflare.com/profile/api-tokens
+  2. "Create Custom token"
+  3. Add the two permissions above
+  4. Under Account Resources, select **only the account** that owns the Pages project (avoid "All accounts")
+  5. Create the token and copy it
+  6. In this repo: Settings → Secrets and variables → Actions → New repository secret named `CLOUDFLARE_API_TOKEN`
+
+  **Optional but recommended**: Also add a secret called `CLOUDFLARE_ACCOUNT_ID` (visible in the left sidebar of the Cloudflare dashboard). The workflow will use it automatically and authentication becomes more stable.
 
 See the workflow file for details and customization (e.g. preview deployments on PRs).
 

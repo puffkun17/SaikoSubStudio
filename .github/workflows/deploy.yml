@@ -59,11 +59,35 @@ jobs:
       # for better error logs and to avoid action-internal npx issues.
       # This also makes the command use the Node version we just set up.
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
+        run: |
+          if [ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            npx wrangler pages deploy .vercel/output/static \
+              --project-name=saikosubstudio \
+              --account-id "$CLOUDFLARE_ACCOUNT_ID"
+          else
+            npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
+          fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        # Required secret: CLOUDFLARE_API_TOKEN with "Pages:Edit" scope.
-        # If you see auth errors, create the secret in repo Settings → Secrets and variables → Actions.
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || '' }}
+        # IMPORTANT: The API token needs these minimum permissions (this exact error is very common):
+        #   - User  → User Details → Read
+        #   - Account → Pages → Edit   (strongly recommended to scope it to the correct account only)
+        #
+        # "Pages:Edit" alone is often NOT enough — Wrangler calls /memberships which requires User Details Read.
+        #
+        # How to create the token:
+        # 1. https://dash.cloudflare.com/profile/api-tokens → Create Custom token
+        # 2. Add the two permissions listed above
+        # 3. Under "Account Resources", choose the specific account that owns your Pages project (don't use "All accounts")
+        # 4. Create + copy the token
+        # 5. In GitHub: repo Settings → Secrets and variables → Actions → New repository secret
+        #    Name:  CLOUDFLARE_API_TOKEN
+        #    Value: the token
+        #
+        # Optional but highly recommended:
+        # - Also create a secret named CLOUDFLARE_ACCOUNT_ID (find it in the Cloudflare dashboard sidebar)
+        #   This makes authentication more reliable and avoids some membership queries.
 
       - name: Deployment info
         run: |
