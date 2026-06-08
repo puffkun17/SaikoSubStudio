@@ -58,16 +58,33 @@ This project is set up for Cloudflare Pages.
 (Note: This works cleanly after the temporary Next.js 15.5.2 downgrade.)
 
 ### Local / Manual Deploy
+**Important distinction:**
+- The `CLOUDFLARE_API_TOKEN` you configured as a **GitHub Repository Secret** is only used by GitHub Actions (for automatic deploys on `git push`).
+- When running deploy commands **directly on your local Mac**, wrangler needs its own authentication (separate from the GitHub secret).
+
+**Easiest way (recommended for local):**
 ```bash
 cd /Users/nexus/SaikoSubStudio
 npm ci
+npx wrangler login          # Opens browser for one-time OAuth login (do this once)
 npm run deploy:pages
-# or manually:
-# npm run pages:build
-# npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
 ```
 
-Local preview:
+**Alternative (using the same token value as your GitHub secret):**
+```bash
+export CLOUDFLARE_API_TOKEN=你的token值
+npm run deploy:pages
+```
+
+Or manually:
+```bash
+npm run pages:build
+npx wrangler pages deploy .vercel/output/static --project-name=saikosubstudio
+```
+
+**Note:** The `pages:build` step works without any token. The token is only required for the actual `wrangler pages deploy` upload.
+
+Local preview (no deploy, no token needed):
 ```bash
 npm run pages:build
 npm run preview

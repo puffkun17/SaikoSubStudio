@@ -4,15 +4,16 @@ import React from 'react';
 import { BackdropSlot, SubtitleDataSlot, StyleSettings } from '@/types/subtitleTypes';
 
 const getOutlineShadow = (outlineColor: string) => {
+  // 保留传统 shadow 作为 fallback，同时推荐使用 text-stroke 获得更锐利的描边
   return `
     -1px -1px 0 ${outlineColor},  
      1px -1px 0 ${outlineColor},
     -1px  1px 0 ${outlineColor},
      1px  1px 0 ${outlineColor},
-    -2px -2px 2px rgba(0,0,0,0.8),
-     2px -2px 2px rgba(0,0,0,0.8),
-    -2px  2px 2px rgba(0,0,0,0.8),
-     2px  2px 2px rgba(0,0,0,0.8)
+    -2px -2px 2px rgba(0,0,0,0.75),
+     2px -2px 2px rgba(0,0,0,0.75),
+    -2px  2px 2px rgba(0,0,0,0.75),
+     2px  2px 2px rgba(0,0,0,0.75)
   `;
 };
 
@@ -49,6 +50,10 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
     lyricPosition = 'top'
   } = style;
 
+  // 字体家族（支持用户自定义，fallback 到原有默认）
+  const zhFontFamily = style.zhFontFamily || 'system-ui, sans-serif';
+  const enFontFamily = style.enFontFamily || 'Helvetica Neue, Arial, sans-serif';
+
   const lyricZhSizeCqh = (lyricFontSize * scale / 288) * 100;
   const lyricEnSizeCqh = (Math.max(10, lyricFontSize * 0.75) * scale / 288) * 100;
   const noteSizeCqh = (18 * scale / 288) * 100;
@@ -66,8 +71,10 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
             color: '#FFFFFF',
             fontWeight: 500,
             textShadow: getOutlineShadow('#000000'),
+            WebkitTextStroke: '0.6px #000000',
+            paintOrder: 'stroke fill',
             lineHeight: 1.25,
-            fontFamily: 'system-ui, sans-serif',
+            fontFamily: zhFontFamily,
             whiteSpace: 'pre-wrap'
           }}
         >
@@ -88,8 +95,10 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 fontWeight: 600,
                 fontStyle: lyricItalic ? 'italic' : 'normal',
                 textShadow: getOutlineShadow('#000000'),
-                lineHeight: 1.25,
-                fontFamily: 'system-ui, sans-serif'
+                WebkitTextStroke: '0.5px #000000',
+                paintOrder: 'stroke fill',
+                lineHeight: 1.3,
+                fontFamily: zhFontFamily
               }}
             >
               {lyricZh}
@@ -104,9 +113,11 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 fontWeight: 600,
                 fontStyle: lyricItalic ? 'italic' : 'normal',
                 textShadow: getOutlineShadow('#000000'),
+                WebkitTextStroke: '0.4px #000000',
+                paintOrder: 'stroke fill',
                 lineHeight: 1.2,
                 transform: `scale(${style.enScale ? style.enScale / 100 : 0.9})`,
-                fontFamily: 'Helvetica Neue, Arial, sans-serif'
+                fontFamily: enFontFamily
               }}
             >
               {lyricEn}
@@ -133,8 +144,10 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 color: style.zhColor,
                 fontWeight: 700,
                 textShadow: getOutlineShadow(style.zhOutline),
-                lineHeight: 1.25,
-                fontFamily: 'system-ui, sans-serif'
+                WebkitTextStroke: '0.7px ' + (style.zhOutline || '#000000'),
+                paintOrder: 'stroke fill',
+                lineHeight: 1.3,
+                fontFamily: zhFontFamily
               }}
             >
               {zh}
@@ -148,9 +161,11 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 color: style.enColor,
                 fontWeight: 600,
                 textShadow: getOutlineShadow(style.enOutline || '#000000'),
-                lineHeight: 1.2,
+                WebkitTextStroke: '0.5px ' + (style.enOutline || '#000000'),
+                paintOrder: 'stroke fill',
+                lineHeight: 1.25,
                 transform: `scale(${style.enScale ? style.enScale / 100 : 0.9})`,
-                fontFamily: 'Helvetica Neue, Arial, sans-serif'
+                fontFamily: enFontFamily
               }}
             >
               {en}
@@ -181,17 +196,17 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
       case 'tmdb':
         return { backgroundImage: `url(${backdrop.backdropUrl})`, backgroundSize: bgSize, backgroundPosition: 'center' };
       default:
-        return { backgroundColor: '#0c0c10' };
+        return { backgroundColor: '#09090d' };
     }
   };
 
   const isCrt = theaterAspect === '4:3';
-  const maskAspect = isCrt ? '1536/1536' : '1725/1536';
-  const maskImg = isCrt ? '/tv-crt.png' : '/tv-modern.png';
+  const maskAspect = isCrt ? '1536/1288' : '1725/1058';
+  const maskImg = isCrt ? '/tv-crt_v2.png' : '/tv-modern_v2.png';
 
   const screenPos = isCrt 
-      ? { left: '10.7422%', top: '16.9922%', width: '78.4505%', height: '59.5703%' }
-      : { left: '1.6232%', top: '16.3411%', width: '96.0580%', height: '62.3047%' };
+      ? { left: '10.8073%', top: '11.4907%', width: '78.3854%', height: '71.0404%' }
+      : { left: '1.6812%', top: '3.8752%', width: '96.0000%', height: '90.3592%' };
 
   const innerAspect = theaterAspect === '16:9' ? '16/9' : 
                       theaterAspect === '4:3' ? '4/3' : 
@@ -217,13 +232,19 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
 
   return (
     <div 
-      className="flex-1 flex justify-center items-center bg-surface-0 w-full h-full overflow-hidden p-6 md:p-12 relative"
+      className="flex-1 flex justify-center items-center bg-[#050507] w-full h-full overflow-hidden p-6 md:p-12 relative"
       onMouseEnter={triggerTempGuides}
       onMouseMove={triggerTempGuides}
     >
+      {/* 空间极光氛围呼吸光晕 */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+        <div className="absolute top-[20%] left-[20%] w-[55%] h-[55%] rounded-full bg-aurora-glow-purple" />
+        <div className="absolute bottom-[20%] right-[20%] w-[45%] h-[45%] rounded-full bg-aurora-glow-emerald" />
+      </div>
+
       {/* Outer wrapper constrained to the TV Mask's Aspect Ratio */}
       <div 
-        className="relative flex justify-center items-center fade-in-up ring-1 ring-white/[0.04] ring-offset-2 ring-offset-surface-0 rounded-2xl"
+        className="relative flex justify-center items-center fade-in-up border border-white/[0.06] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.5)] z-10"
         style={{
           aspectRatio: maskAspect,
           maxWidth: '100%',
@@ -249,7 +270,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
             containerType: 'size'
           }}
         >
-          {/* Inner Movie Canvas (Letterboxed or Pillarboxed) */}
+          {/* Inner Movie Canvas */}
           <div 
             className="relative flex-shrink-0 bg-[#070709] transition-all duration-300 overflow-hidden"
             style={{
@@ -272,7 +293,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
 
           {subtitle.status === 'loading' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/60 backdrop-blur-xs">
-              <div className="w-6 h-6 border-2 border-accent-gold border-t-transparent rounded-full animate-spin mb-3" />
+              <div className="w-6 h-6 border-2 border-accent-neon border-t-transparent rounded-full animate-spin mb-3" />
               <span className="text-white/40 text-xs font-mono tracking-widest uppercase">
                 {subtitle.progress ? `Loading ${Math.round(subtitle.progress * 100)}%` : 'Loading Subtitles...'}
               </span>
@@ -284,7 +305,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
               <span className="text-rose-500/80 text-xs font-mono tracking-widest uppercase mb-1">
                 [ Data Error ]
               </span>
-              <span className="text-white/40 text-[10px] font-mono tracking-wide px-4 text-center max-w-xs break-words">
+              <span className="text-white/40 text-[0.625rem] font-mono tracking-wide px-4 text-center max-w-xs break-words">
                 {subtitle.message}
               </span>
             </div>
@@ -310,20 +331,20 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
             </div>
           )}
 
-          {/* Alignment Guide Lines */}
+          {/* Alignment Guide Lines - Simplified Neon purple/green guides */}
           <div 
             className="absolute left-0 right-0 z-40 transition-all duration-300 pointer-events-none flex items-center"
             style={{
               bottom: `${paddingBottomCqh}cqh`,
               opacity: (guides.show || guides.temp) ? 1 : 0,
-              borderBottom: `1px dashed ${isMagnetic ? '#39FF14' : 'rgba(242,169,0,0.4)'}`,
-              boxShadow: isMagnetic ? '0 0 10px #39FF14, 0 0 4px #39FF14' : 'none',
-              transform: 'scaleY(0.5)', // Effectively 0.5px
+              borderBottom: `1px dashed ${isMagnetic ? '#10b981' : 'rgba(168,85,247,0.45)'}`,
+              boxShadow: isMagnetic ? '0 0 10px #10b981, 0 0 4px #10b981' : 'none',
+              transform: 'scaleY(0.5)',
               transformOrigin: 'bottom'
             }}
           >
             {isMagnetic && (
-               <div className="absolute right-4 -top-3.5 text-[9px] text-[#39FF14]/80 font-mono tracking-[0.2em] uppercase bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded shadow-[0_0_8px_#39FF14] scale-y-200">
+               <div className="absolute right-4 -top-3.5 text-[0.5625rem] text-[#10b981]/90 font-mono tracking-[0.2em] uppercase bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(16,185,129,0.5)] scale-y-200">
                  MAGNETIC ALIGNED
                </div>
             )}
@@ -336,7 +357,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
               style={{
                 bottom: `${targetCqh}cqh`,
                 opacity: (guides.show || guides.temp) && !isMagnetic ? 1 : 0,
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
                 transform: 'scaleY(0.5)',
                 transformOrigin: 'bottom'
               }}

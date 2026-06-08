@@ -7,8 +7,9 @@ import { SimulatorBoundary } from '@/components/Theater/SimulatorBoundary';
 import { ControlDeck } from '@/components/Theater/ControlDeck';
 import { StyleSidebar } from '@/components/Settings/StyleSidebar';
 import { ExportDropdown } from '@/hooks/useExport';
-import { Save, Sliders, ChevronLeft } from 'lucide-react';
+import { Save, ChevronLeft, Sliders } from 'lucide-react';
 import { SubtitleDataSlot, BackdropSlot } from '@/types/subtitleTypes';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const TheaterStep: React.FC = () => {
   const {
@@ -58,59 +59,71 @@ export const TheaterStep: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col overflow-hidden relative bg-surface-0">
-      {/* Premium Independent Top Navbar with fixed height and symmetrical alignment */}
-      <div className="flex justify-between items-center px-6 h-[52px] bg-surface-1/95 backdrop-blur-md border-b border-white/5 z-20 flex-shrink-0">
+    <div className="flex-1 w-full h-full flex flex-col overflow-hidden relative bg-[#050507]">
+      
+      {/* Symmetrical Top Navbar */}
+      <div className="flex justify-between items-center px-6 h-[52px] bg-[#030305]/40 backdrop-blur-md border-b border-white/[0.06] z-50 flex-shrink-0">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <button 
-              className="p-2 hover:bg-white/5 border border-white/10 rounded-xl transition duration-200 text-white/70 hover:text-white flex items-center justify-center"
+            <motion.button 
+              whileHover={{ scale: 1.03, y: -0.5 }}
+              whileTap={{ scale: 0.97 }}
+              className="p-2 glass-btn-ar rounded-lg flex items-center justify-center cursor-pointer text-neutral-400 hover:text-neutral-200"
               onClick={handleBack}
               title="返回工作台"
             >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+              <ChevronLeft className="w-4 h-4" />
+            </motion.button>
           </div>
           
-          <div className="flex items-center gap-2 text-sm md:text-base tracking-widest font-bold text-white/40">
-            <span>NEXUS STUDIO</span>
-            <span>/</span>
-            <span className="text-white/80">{isTemplateLab ? '模板实验室' : '放映厅预览'}</span>
+          <div className="flex items-center gap-2 text-base tracking-widest font-mono font-bold text-neutral-400 uppercase">
+            <span>studio</span>
+            <span>//</span>
+            <span className="text-neutral-200 [text-shadow:0_0_8px_rgba(255,255,255,0.15)]">{isTemplateLab ? '模板实验室' : '放映厅模式'}</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Style sidebar toggle */}
+          <motion.button 
+            whileHover={{ scale: 1.02, y: -0.5 }}
+            whileTap={{ scale: 0.98 }}
+            className={`py-2 px-4 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer
+              ${isSettingsOpen ? 'glass-btn-ar-active' : 'glass-btn-ar text-neutral-350 hover:text-white'}`}
+            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+            title="样式配置选项"
+          >
+            <Sliders className="w-4 h-4" />
+            样式参数
+          </motion.button>
+
           {/* Save to library */}
-          <button 
-            className="py-1.5 px-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 font-bold text-xs md:text-sm rounded-lg transition md:py-2 md:px-4 duration-200 flex items-center gap-1.5"
+          <motion.button 
+            whileHover={{ scale: 1.02, y: -0.5 }}
+            whileTap={{ scale: 0.98 }}
+            className="py-2 px-4.5 glass-btn-ar text-neutral-200 font-bold text-sm uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
             onClick={saveToLibrary}
           >
-            <Save className="w-3.5 h-3.5 text-accent-gold" />
+            <Save className="w-4 h-4 text-violet-400" />
             存入字幕库
-          </button>
-
-          {/* Style side toggle */}
-          <button 
-            className={`py-1.5 px-3 border text-xs md:text-sm font-bold rounded-lg transition md:py-2 md:px-4 duration-200 flex items-center gap-1.5
-              ${isSettingsOpen 
-                ? 'bg-accent-gold/10 border-accent-gold text-white' 
-                : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'}`}
-            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            样式参数
-          </button>
+          </motion.button>
 
           {/* Shared export dropdown */}
-          <ExportDropdown variant="gold" />
+          <ExportDropdown variant="ghost" />
         </div>
       </div>
 
-      {/* Simulator canvas and side configuration overlay panels */}
+      {/* Top settings bar (ControlDeck) - Fully separated from preview */}
+      <div className="w-full bg-[#030305]/60 backdrop-blur-sm border-b border-white/[0.06] py-2.5 px-6 z-45 flex-shrink-0 select-none">
+        <ControlDeck />
+      </div>
+
+      {/* Simulator canvas and sidebar overlays */}
       <div className="flex-1 flex overflow-hidden min-h-0 relative">
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className={`flex-1 flex flex-col min-w-0 relative pb-2 transition-all duration-300 ${isSettingsOpen ? 'lg:pr-[364px]' : 'pr-0'}`}>
+          
           {/* Main simulator screen wrapped in defensive ErrorBoundary */}
-          <div className="flex-1 min-h-0 bg-surface-0">
+          <div className="flex-1 min-h-0 bg-[#050507] z-10 relative">
             <SimulatorBoundary>
               <ScreenSimulator 
                 subtitle={subtitleSlot}
@@ -124,58 +137,65 @@ export const TheaterStep: React.FC = () => {
             </SimulatorBoundary>
           </div>
 
-          {/* Floating Slider dashboard below canvas screen */}
+          {/* Bottom compact timeline slider (Non-absolute, sits under preview cleanly) */}
           {processedSubs && processedSubs.length > 0 && (
-            <div className="bg-surface-2/80 backdrop-blur border-y border-white/5 px-6 py-2 z-10 w-full select-none flex-shrink-0">
-              <div className="flex items-center gap-4 w-full">
-                <div className="flex-1 flex items-center">
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max={processedSubs.length - 1} 
-                    value={previewIndex} 
-                    onChange={e => setPreviewIndex(parseInt(e.target.value, 10))}
-                    className="v9-timeline-dial-slider w-full"
-                  />
-                </div>
-                
-                <div className="v9-dial-gauge flex items-center gap-2 flex-shrink-0">
-                  <span className="v9-dial-gauge-label text-xs md:text-sm">Line</span>
-                  <input 
-                    type="number"
-                    min="1"
-                    max={processedSubs.length}
-                    value={previewIndex + 1}
-                    onChange={e => {
-                      const val = parseInt(e.target.value, 10);
-                      if (!isNaN(val)) {
-                        setPreviewIndex(Math.max(0, Math.min(val - 1, processedSubs.length - 1)));
-                      }
-                    }}
-                    className="v9-dial-gauge-input no-spin text-sm md:text-base w-12"
-                    placeholder="1"
-                  />
-                  <div className="w-[1px] h-3 bg-white/20" />
-                  <span className="v9-dial-gauge-value text-[#f2a900] text-sm md:text-base font-bold">{percentVal}%</span>
-                </div>
+            <div className="w-[96%] max-w-5xl mx-auto z-30 glass-panel-ar rounded-2xl p-4 flex flex-row items-center gap-5 hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-all duration-300 mt-2 mb-4 flex-shrink-0">
+              
+              {/* Timeline Slider and Input indicator */}
+              <div className="flex-1 h-12 rounded-xl px-4 bg-white/[0.02] border border-white/[0.06] flex items-center relative group/slider">
+                <input 
+                  type="range" 
+                  min="0" 
+                  max={processedSubs.length - 1} 
+                  value={previewIndex} 
+                  onChange={e => setPreviewIndex(parseInt(e.target.value, 10))}
+                  className="w-full glass-slider-input cursor-pointer"
+                />
+              </div>
+              
+              <div className="flex items-center gap-3 flex-shrink-0 font-mono">
+                <span className="text-sm text-neutral-400 uppercase tracking-widest font-bold">行</span>
+                <input 
+                  type="number"
+                  min="1"
+                  max={processedSubs.length}
+                  value={previewIndex + 1}
+                  onChange={e => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val)) {
+                      setPreviewIndex(Math.max(0, Math.min(val - 1, processedSubs.length - 1)));
+                    }
+                  }}
+                  className="bg-white/[0.03] border border-white/[0.08] text-violet-400 text-base rounded-lg py-1.5 px-3 w-20 outline-none focus:border-white/20 text-center font-bold font-mono"
+                  placeholder="1"
+                />
+                <div className="w-[1px] h-4.5 bg-white/[0.08]" />
+                <motion.span 
+                  key={percentVal}
+                  animate={{ scale: [1, 1.05, 1] }}
+                  className="text-violet-400 text-sm font-mono font-bold w-16 text-right [text-shadow:0_0_8px_rgba(168,85,247,0.35)]"
+                >
+                  {percentVal}%
+                </motion.span>
               </div>
             </div>
           )}
-
-          {/* Bottom ratios and scene settings deck */}
-          <div className="p-6 bg-surface-0 flex-shrink-0">
-            <ControlDeck />
-          </div>
         </div>
 
-        {/* Side Settings overlay Sidebar if toggled */}
-        {isSettingsOpen && (
-          <div className="pl-4 pr-8 py-6 shrink-0 h-full bg-surface-0">
-            <div className="w-72 flex flex-col bg-surface-2 border border-white/10 rounded-2xl shrink-0 h-full overflow-y-auto shadow-2xl [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+        {/* Floating Style Drawer */}
+        <AnimatePresence>
+          {isSettingsOpen && (
+            <motion.div
+              initial={{ x: 360, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 360, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute right-6 top-6 bottom-6 w-[340px] z-50 glass-panel-ar rounded-3xl overflow-hidden flex flex-col"
+            >
               <StyleSidebar />
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

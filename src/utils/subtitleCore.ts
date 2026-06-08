@@ -35,6 +35,9 @@ export interface StyleSettings {
   lyricColor?: string;
   lyricItalic?: boolean;
   lyricPosition?: 'top' | 'bottom';
+  // 新增：字体家族（预览优先，导出时尽量映射）
+  zhFontFamily?: string;
+  enFontFamily?: string;
 }
 
 /**
@@ -62,7 +65,7 @@ export function decodeBuffer(buffer: ArrayBuffer): DecodeResult {
       if (/\d{2}:\d{2}:\d{2}/.test(text)) {
         return { text, encoding: encoding + ' (Auto)' };
       }
-    } catch (e) {
+    } catch {
       continue;
     }
   }
@@ -273,9 +276,9 @@ export function smartDetectTitle(name1: string, name2: string, content1 = '', co
   const commonWords = s1.filter(w => s2.includes(w));
   
   const epPattern = /(S\d+E\d+|EP\d+|E\d+)/i;
-  const ep = name1.match(epPattern) || name2.match(epPattern);
+  const _ep = name1.match(epPattern) || name2.match(epPattern);
   
-  let suggested = commonWords.join(' ');
+  const suggested = commonWords.join(' ');
 
   if (metadataTitle && metadataTitle.length > suggested.length * 0.5) return metadataTitle;
   if (suggested.length > 3) return suggested;
@@ -663,7 +666,7 @@ export function alignSubtitlesIndustrial(
     for (let j = 1; j <= N; j++) {
       const scoreMatch = dp[i-1][j-1] + getPairScore(i-1, j-1);
       const scoreGapZh = dp[i-1][j] + gapPenalty;
-      const scoreGapEn = dp[i][j-1] + gapPenalty;
+      const _scoreGapEn = dp[i][j-1] + gapPenalty;
       dp[i][j] = Math.max(scoreMatch, scoreGapZh, scoreGapEn);
     }
   }
@@ -677,7 +680,7 @@ export function alignSubtitlesIndustrial(
     if (i > 0 && j > 0) {
       const scoreMatch = dp[i-1][j-1] + getPairScore(i-1, j-1);
       const scoreGapZh = dp[i-1][j] + gapPenalty;
-      const scoreGapEn = dp[i][j-1] + gapPenalty;
+      const _scoreGapEn = dp[i][j-1] + gapPenalty;
       const current = dp[i][j];
       
       if (current === scoreMatch) {
@@ -856,11 +859,11 @@ Title: ${title}
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Han,PingFang SC,${mZhFont},${assZhColor},&H00FF9C41,${assZhOutline},&H00000000,1,0,0,0,100,100,0,0,1,${mOutline},${mShadow},2,${mBaseMargin},${mBaseMargin},${mMarginV},1
-Style: EN,Helvetica Neue,${mEnFont},${assEnColor},&H00FFFFFF,&H00000000,&H00000000,1,0,0,0,${enScale},${enScale},0,0,1,${mEnOutline},${mEnOutline},2,${mBaseMargin},${mBaseMargin},${Math.floor(mMarginV * 0.6)},1
-Style: Note,PingFang SC,${mNoteFont},&H00FFFFFF,&H000000FF,&H0000FBFF,&H00000000,0,0,0,0,100,100,0,0,1,${mOutline},${mShadow},8,${mBaseMargin},${mBaseMargin},${mMarginV},1
-Style: Lyrics,PingFang SC,${mLyricFont},${assLyricColor},&H00000000,&H00000000,&H00000000,0,${lyricItalic ? 1 : 0},0,0,100,100,0,0,1,${mOutline},${mShadow},${lyricPosition === 'top' ? 8 : 2},${mBaseMargin},${mBaseMargin},${lyricPosition === 'top' ? Math.floor(mMarginV * 0.8) : mMarginV},1
-Style: Lyrics_EN,Helvetica Neue,${mLyricEnFont},${assLyricColor},&H00000000,&H00000000,&H00000000,0,${lyricItalic ? 1 : 0},0,0,100,100,0,0,1,${mEnOutline},${mEnOutline},${lyricPosition === 'top' ? 8 : 2},${mBaseMargin},${mBaseMargin},${lyricPosition === 'top' ? Math.floor(mMarginV * 0.5) : Math.floor(mMarginV * 0.6)},1
+Style: Han,${styleSettings.zhFontFamily?.includes('PingFang') ? 'PingFang SC' : styleSettings.zhFontFamily?.includes('Noto') ? 'Noto Sans SC' : styleSettings.zhFontFamily?.includes('YaHei') ? 'Microsoft YaHei' : 'PingFang SC'},${mZhFont},${assZhColor},&H00FF9C41,${assZhOutline},&H00000000,1,0,0,0,100,100,0,0,1,${mOutline},${mShadow},2,${mBaseMargin},${mBaseMargin},${mMarginV},1
+Style: EN,${styleSettings.enFontFamily?.includes('Helvetica') ? 'Helvetica Neue' : styleSettings.enFontFamily?.includes('Inter') ? 'Inter' : 'Helvetica Neue'},${mEnFont},${assEnColor},&H00FFFFFF,&H00000000,&H00000000,1,0,0,0,${enScale},${enScale},0,0,1,${mEnOutline},${mEnOutline},2,${mBaseMargin},${mBaseMargin},${Math.floor(mMarginV * 0.6)},1
+Style: Note,${styleSettings.zhFontFamily?.includes('PingFang') ? 'PingFang SC' : styleSettings.zhFontFamily?.includes('Noto') ? 'Noto Sans SC' : 'PingFang SC'},${mNoteFont},&H00FFFFFF,&H000000FF,&H0000FBFF,&H00000000,0,0,0,0,100,100,0,0,1,${mOutline},${mShadow},8,${mBaseMargin},${mBaseMargin},${mMarginV},1
+Style: Lyrics,${styleSettings.zhFontFamily?.includes('PingFang') ? 'PingFang SC' : styleSettings.zhFontFamily?.includes('Noto') ? 'Noto Sans SC' : 'PingFang SC'},${mLyricFont},${assLyricColor},&H00000000,&H00000000,&H00000000,0,${lyricItalic ? 1 : 0},0,0,100,100,0,0,1,${mOutline},${mShadow},${lyricPosition === 'top' ? 8 : 2},${mBaseMargin},${mBaseMargin},${lyricPosition === 'top' ? Math.floor(mMarginV * 0.8) : mMarginV},1
+Style: Lyrics_EN,${styleSettings.enFontFamily?.includes('Helvetica') ? 'Helvetica Neue' : styleSettings.enFontFamily?.includes('Inter') ? 'Inter' : 'Helvetica Neue'},${mLyricEnFont},${assLyricColor},&H00000000,&H00000000,&H00000000,0,${lyricItalic ? 1 : 0},0,0,100,100,0,0,1,${mEnOutline},${mEnOutline},${lyricPosition === 'top' ? 8 : 2},${mBaseMargin},${mBaseMargin},${lyricPosition === 'top' ? Math.floor(mMarginV * 0.5) : Math.floor(mMarginV * 0.6)},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -924,7 +927,7 @@ export function checkIsBilingual(text: string): boolean {
   
   if (cleanText.includes('[Events]') && cleanText.includes('Dialogue:')) {
     const lines = cleanText.split(/\r?\n/);
-    for (let line of lines) {
+    for (const line of lines) {
       if (line.trim().startsWith('Dialogue:')) {
         const parts = line.split(',');
         if (parts.length >= 10) {

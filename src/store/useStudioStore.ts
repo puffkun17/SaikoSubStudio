@@ -23,6 +23,7 @@ export interface TaskPair {
   files: Subfile[];
   tmdbData?: TmdbMetadata | null;
   tmdbBackdrop?: string | null;
+  tmdbBackdropList?: string[];
 }
 
 export interface LibraryItem {
@@ -124,6 +125,7 @@ export interface StudioState {
   setShowAssHint: (val: boolean) => void;
   setTasks: (tasks: TaskPair[] | ((prev: TaskPair[]) => TaskPair[])) => void;
   setRefScreenshot: (url: string | null) => void;
+  setTmdbApiKey: (key: string) => void;
   triggerTempGuides: () => void;
   searchTmdb: (query: string) => Promise<void>;
   searchTmdbManual: (query: string, type: string, year: string) => Promise<void>;
@@ -155,9 +157,13 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   libraryList: [],
   tmdbData: null,
   tmdbBackdrop: null,
+  tmdbBackdropList: [],
   isTemplateLab: false,
   customStyle: {
-    zhFontSize: 20, enFontSize: 12, zhColor: '#FFFFFF', enColor: '#B0B0B0', zhOutline: '#FF9C41', enOutline: '#000000', enScale: 90, maxLenZh: 20, maxLenEn: 80, marginV: 20, resolution: '1080p', aspectRatio: '16:9', globalScale: 1.0, lyricFontSize: 16, lyricColor: '#E6E6FA', lyricItalic: true, lyricPosition: 'top'
+    zhFontSize: 20, enFontSize: 12, zhColor: '#FFFFFF', enColor: '#B0B0B0', zhOutline: '#FF9C41', enOutline: '#000000', enScale: 90, maxLenZh: 20, maxLenEn: 80, marginV: 20, resolution: '1080p', aspectRatio: '16:9', globalScale: 1.0, lyricFontSize: 16, lyricColor: '#E6E6FA', lyricItalic: true, lyricPosition: 'top',
+    // 字体家族默认（系统级，跨平台较稳）
+    zhFontFamily: 'system-ui, sans-serif',
+    enFontFamily: 'Helvetica Neue, Arial, sans-serif'
   },
   customTemplates: [],
   logs: [],
@@ -180,7 +186,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   tempShowGuides: false,
   showAssHint: false,
   foundAssStyle: null,
-  tmdbApiKey: 'e9faf28709fd20f70fa5d70330ad0b11',
+  tmdbApiKey: '', // 已移除硬编码。使用 setTmdbApiKey 配置（持久化 localStorage），开源部署请用户自备 Key。
   refScreenshot: null,
   isSearchingTmdb: false,
   alignmentMode: 'standard',
@@ -211,6 +217,27 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   setSelectedTaskId: (selectedTaskId) => set({ selectedTaskId }),
   setTmdbData: (tmdbData) => set({ tmdbData }),
   setTmdbBackdrop: (tmdbBackdrop) => set({ tmdbBackdrop }),
+
+  shuffleBackdrop: () => {
+    const { tmdbBackdropList, tmdbBackdrop, selectedTaskId } = get();
+    if (!tmdbBackdropList || tmdbBackdropList.length <= 1) {
+      get().addLog("当前影视没有其他备用剧照可选", "info");
+      return;
+    }
+    let available = tmdbBackdropList.filter(url => url !== tmdbBackdrop);
+    if (available.length === 0) available = tmdbBackdropList;
+    
+    const randIdx = Math.floor(Math.random() * available.length);
+    const nextBackdrop = available[randIdx];
+    
+    set({ tmdbBackdrop: nextBackdrop });
+    if (selectedTaskId) {
+      set(state => ({
+        tasks: state.tasks.map(t => t.id === selectedTaskId ? { ...t, tmdbBackdrop: nextBackdrop } : t)
+      }));
+    }
+    get().addLog("已从备选池中随机切换了下一张剧照", "success");
+  },
   setIsTemplateLab: (isTemplateLab) => set({ isTemplateLab }),
   setCustomStyle: (customStyle) => set({ customStyle }),
   saveCustomTemplate: (name) => set((state) => {
@@ -250,6 +277,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
     return { tasks: nextTasks };
   }),
   setRefScreenshot: (refScreenshot) => set({ refScreenshot }),
+  setTmdbApiKey: (tmdbApiKey) => {
+    set({ tmdbApiKey });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('saiko_tmdb_api_key', tmdbApiKey);
+    }
+  },
   triggerTempGuides: () => {
     set({ tempShowGuides: true });
     if (tempShowTimeoutId) {
@@ -266,6 +299,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
     
     const searchStr = cleanFilename(rawSearchStr);
     if (!searchStr) return;
+
+    if (!get().tmdbApiKey) {
+      get().addLog('请先在“样式参数”高级设置中配置 TMDB API Key（隐藏保存，不提交仓库）', 'error');
+      set({ isSearchingTmdb: false });
+      return;
+    }
     
     set({ isSearchingTmdb: true });
     get().addLog(`正在自动云端检索: ${searchStr}...`, 'info');
@@ -403,6 +442,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
     
     const searchStr = cleanFilename(rawSearchStr);
     if (!searchStr) return;
+
+    if (!get().tmdbApiKey) {
+      get().addLog('请先在“样式参数”高级设置中配置 TMDB API Key（隐藏保存，不提交仓库）', 'error');
+      set({ isSearchingTmdb: false });
+      return;
+    }
     
     set({ isSearchingTmdb: true });
     get().addLog(`正在手动检索 ${type === 'movie' ? '电影' : '剧集'}: ${searchStr}...`, 'info');
@@ -504,19 +549,58 @@ export const useStudioStore = create<StudioState>((set, get) => ({
         }
       }
 
+      // Fetch images list (stills if TV episode, backdrops if movie) for random immersive selection
+      let backdrops: string[] = [];
+      try {
+        let imagesUrl = `https://api.themoviedb.org/3/${type}/${s.id}/images?api_key=${tmdbApiKey}`;
+        const activeTaskForEp = get().tasks.find(t => t.id === selectedTaskId);
+        if (type === 'tv' && activeTaskForEp?.epKey) {
+          const epMatch = activeTaskForEp.epKey.match(/S(\d+)E(\d+)/i);
+          if (epMatch) {
+            const seasonNum = parseInt(epMatch[1]);
+            const episodeNum = parseInt(epMatch[2]);
+            imagesUrl = `https://api.themoviedb.org/3/tv/${s.id}/season/${seasonNum}/episode/${episodeNum}/images?api_key=${tmdbApiKey}`;
+          }
+        }
+        const imgRes = await fetch(imagesUrl);
+        if (imgRes.ok) {
+          const imgData = await imgRes.json();
+          const hasEpisodeStills = type === 'tv' && activeTaskForEp?.epKey;
+          const list = hasEpisodeStills ? (imgData.stills || []) : (imgData.backdrops || []);
+          backdrops = list.map((img: any) => `https://image.tmdb.org/t/p/original${img.file_path}`).filter(Boolean);
+        }
+      } catch (e) {
+        console.error("Failed to fetch TMDB images list:", e);
+      }
+
+      // Fallback to suggestion backdrop if no images list
+      if (backdrops.length === 0 && s.backdrop_path) {
+        backdrops = [`https://image.tmdb.org/t/p/original${s.backdrop_path}`];
+      }
+
+      // Randomly select one, skipping top promo images for better immersion (from NAS version)
+      let chosenBackdrop = backdrops[0] || backdropUrl || null;
+      if (backdrops.length > 0) {
+        const skipCount = backdrops.length > 4 ? 3 : 0;
+        const candidates = backdrops.slice(skipCount);
+        const randIdx = Math.floor(Math.random() * candidates.length);
+        chosenBackdrop = candidates[randIdx];
+        get().addLog(`[剧照随机] 已从 ${backdrops.length} 张物料中随机提取了临场感剧照`, 'info');
+      }
+
       const meta: TmdbMetadata = {
         title: mainTitle,
         originalTitle: details.original_title || details.original_name || '',
         year: (details.release_date || details.first_air_date || '').substring(0, 4),
         genres,
         posterUrl,
-        backdropUrl,
+        backdropUrl: chosenBackdrop,
         overview: details.overview || '暂无剧情简介。',
         voteAverage: details.vote_average || 0,
         isAnime: genres.includes('动画') || genres.includes('Animation')
       };
 
-      set({ tmdbData: meta, tmdbBackdrop: backdropUrl });
+      set({ tmdbData: meta, tmdbBackdrop: chosenBackdrop, tmdbBackdropList: backdrops });
 
       let formattedName = meta.title;
       if (meta.year) {
@@ -547,7 +631,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
 
       if (selectedTaskId) {
         set(state => ({
-          tasks: state.tasks.map(t => t.id === selectedTaskId ? { ...t, title: formattedName, tmdbData: meta, tmdbBackdrop: backdropUrl } : t)
+          tasks: state.tasks.map(t => t.id === selectedTaskId ? { ...t, title: formattedName, tmdbData: meta, tmdbBackdrop: chosenBackdrop, tmdbBackdropList: backdrops } : t)
         }));
       }
 
@@ -562,7 +646,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
     if (typeof window === 'undefined') return;
     const savedLib = localStorage.getItem('nexus_subtitle_library');
     if (savedLib) {
-      try { set({ libraryList: JSON.parse(savedLib) }); } catch (e: any) {}
+      try { set({ libraryList: JSON.parse(savedLib) }); } catch {}
     }
     const savedStyles = localStorage.getItem('nexus_subtitle_styles_v4');
     if (savedStyles) {
@@ -571,7 +655,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
         if (preset) set({ activePreset: preset });
         if (style) set({ customStyle: { resolution: '1080p', aspectRatio: '16:9', globalScale: 1.0, lyricFontSize: 16, lyricColor: '#E6E6FA', lyricItalic: true, lyricPosition: 'top', ...style } });
         if (templates) set({ customTemplates: templates });
-      } catch (e: any) {}
+      } catch {}
+    }
+    // 加载用户隐藏配置的 TMDB Key（原代码中为硬编码，已移除；此处支持持久化隐藏设置）
+    const savedKey = localStorage.getItem('saiko_tmdb_api_key');
+    if (savedKey) {
+      set({ tmdbApiKey: savedKey });
     }
   },
 
@@ -582,7 +671,8 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       selectedTaskId: taskId,
       files: { zh: task.zh, en: task.en, commentary: task.commentary },
       tmdbData: task.tmdbData || null,
-      tmdbBackdrop: task.tmdbBackdrop || null
+      tmdbBackdrop: task.tmdbBackdrop || null,
+      tmdbBackdropList: task.tmdbBackdropList || []
     });
     
     const detectTitle = smartDetectTitle(
@@ -613,7 +703,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       tmdbManualInput: { 
          ...state.tmdbManualInput, 
          title: cleanName,
-         type: type as any,
+         type: type as 'tv' | 'movie',
          season,
          episode
       }
@@ -722,7 +812,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   },
 
   saveToLibrary: () => {
-    const { processedSubs, customFilename, tmdbBackdrop, customStyle, libraryList } = get();
+    const { processedSubs, customFilename, tmdbBackdrop, tmdbBackdropList, customStyle, libraryList } = get();
     if (!processedSubs || processedSubs.length === 0) return;
     const name = customFilename || '未命名字幕';
     const newItem: LibraryItem = {
@@ -731,6 +821,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       date: new Date().toLocaleString(),
       subs: processedSubs,
       backdrop: tmdbBackdrop,
+      backdropList: tmdbBackdropList,
       customStyle: customStyle
     };
     const updatedLib = [newItem, ...libraryList];
@@ -757,6 +848,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       processedSubs: item.subs,
       customFilename: item.name,
       tmdbBackdrop: item.backdrop,
+      tmdbBackdropList: item.backdropList || (item.backdrop ? [item.backdrop] : []),
       customStyle: item.customStyle,
       previewIndex: 0,
       workflowStep: 2
@@ -806,7 +898,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
         const fileBase = getBaseTitle(file.name).toLowerCase();
 
         // Try to find an existing task that matches this file
-        let matchedTask = currentTasks.find(t => {
+        const matchedTask = currentTasks.find(t => {
           // 1. Must share the same base title
           const sameBase = t.files.some(f => getBaseTitle(f.name).toLowerCase() === fileBase);
           if (!sameBase) return false;
@@ -874,7 +966,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   },
 
   runSubtitleMerge: () => {
-    const { files, selectedTaskId, tasks, customFilename } = get();
+    const { files, selectedTaskId, tasks } = get();
     const currentTask = tasks.find(t => t.id === selectedTaskId);
     if (!files.zh && !files.en) return;
 
@@ -907,8 +999,9 @@ export const useStudioStore = create<StudioState>((set, get) => ({
         const finalSubs = autoSignature(merged);
         set({ processedSubs: finalSubs, previewIndex: 0, workflowStep: 2 });
       }
-    } catch (e: any) {
-      get().addLog(`[异常] 合并失败: ${e.message}`, 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      get().addLog(`[异常] 合并失败: ${msg}`, 'error');
     } finally {
       set({ isProcessing: false });
     }
@@ -924,6 +1017,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       selectedTaskId: null,
       tmdbData: null,
       tmdbBackdrop: null,
+      tmdbBackdropList: [],
       isTemplateLab: false,
       logs: [],
       previewIndex: 0,

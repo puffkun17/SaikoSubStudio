@@ -28,12 +28,12 @@ export class SimulatorBoundary extends React.Component<Props, State> {
           <div className="text-rose-500/80 text-xs font-mono tracking-widest uppercase mb-2">
             [ SIMULATOR RENDER CRASHED ]
           </div>
-          <div className="text-white/50 text-[11px] font-mono max-w-md text-center break-all">
+          <div className="text-white/50 text-[0.6875rem] font-mono max-w-md text-center break-all">
             {this.state.error.message || 'Unknown rendering exception occurred'}
           </div>
           <button 
             onClick={() => this.setState({ error: null })}
-            className="mt-4 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white rounded-lg text-[11px] font-mono tracking-wider transition-all duration-200"
+            className="mt-4 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white rounded-lg text-[0.6875rem] font-mono tracking-wider transition-all duration-200"
           >
             RETRY RENDER
           </button>

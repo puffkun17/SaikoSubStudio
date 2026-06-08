@@ -89,7 +89,9 @@ export const StyleSidebar: React.FC = () => {
       maxLenEn: 80,
       resolution: '1080p' as const,
       aspectRatio: '16:9' as const,
-      globalScale: 1.0
+      globalScale: 1.0,
+      zhFontFamily: 'system-ui, sans-serif',
+      enFontFamily: 'Helvetica Neue, Arial, sans-serif'
     };
     setCustomStyle(defaultStyle);
     if (typeof window !== 'undefined') {
@@ -214,48 +216,99 @@ export const StyleSidebar: React.FC = () => {
           <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">参数微调 (TWEAK)</span>
         </div>
         
-        {/* Font Sizes */}
+        {/* Font Sizes & Global Scale */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between text-xs font-medium text-white/80">
-              <span>中文字号 (ZH Font Size)</span>
-              <span className="font-mono text-accent-gold">{customStyle.zhFontSize}px</span>
+              <span>中文字号 (参考单位 / ASS)</span>
+              <span className="font-mono text-accent-gold">{customStyle.zhFontSize}</span>
             </div>
-            <input 
-              type="range" min="12" max="36" 
-              value={customStyle.zhFontSize}
-              onChange={e => handleStyleChange('zhFontSize', parseInt(e.target.value, 10))}
-              className="v9-timeline-dial-slider"
-            />
+            <div className="flex gap-2 items-center">
+              <input 
+                type="range" min="12" max="36" step="1"
+                value={customStyle.zhFontSize}
+                onChange={e => handleStyleChange('zhFontSize', parseInt(e.target.value, 10))}
+                className="v9-timeline-dial-slider flex-1"
+              />
+              <input 
+                type="number" min="8" max="48" step="1"
+                value={customStyle.zhFontSize}
+                onChange={e => handleStyleChange('zhFontSize', Math.max(8, Math.min(48, parseInt(e.target.value) || 20)))}
+                className="w-14 bg-white/[0.04] border border-white/10 rounded px-1.5 py-0.5 text-xs font-mono text-center"
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between text-xs font-medium text-white/80">
-              <span>英文字号 (EN Font Size)</span>
-              <span className="font-mono text-accent-gold">{customStyle.enFontSize}px</span>
+              <span>英文字号 (参考单位 / ASS)</span>
+              <span className="font-mono text-accent-gold">{customStyle.enFontSize}</span>
             </div>
-            <input 
-              type="range" min="8" max="24" 
-              value={customStyle.enFontSize}
-              onChange={e => handleStyleChange('enFontSize', parseInt(e.target.value, 10))}
-              className="v9-timeline-dial-slider"
-            />
+            <div className="flex gap-2 items-center">
+              <input 
+                type="range" min="8" max="24" step="1"
+                value={customStyle.enFontSize}
+                onChange={e => handleStyleChange('enFontSize', parseInt(e.target.value, 10))}
+                className="v9-timeline-dial-slider flex-1"
+              />
+              <input 
+                type="number" min="6" max="32" step="1"
+                value={customStyle.enFontSize}
+                onChange={e => handleStyleChange('enFontSize', Math.max(6, Math.min(32, parseInt(e.target.value) || 12)))}
+                className="w-14 bg-white/[0.04] border border-white/10 rounded px-1.5 py-0.5 text-xs font-mono text-center"
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between text-xs font-medium text-white/80">
-              <span>垂直边距 (Vertical Margin)</span>
-              <span className="font-mono text-accent-gold">{customStyle.marginV}px</span>
+              <span>垂直边距 (MarginV)</span>
+              <span className="font-mono text-accent-gold">{customStyle.marginV}</span>
             </div>
-            <input 
-              type="range" min="10" max="60" 
-              value={customStyle.marginV}
-              onChange={e => {
-                handleStyleChange('marginV', parseInt(e.target.value, 10));
-                triggerTempGuides();
-              }}
-              className="v9-timeline-dial-slider"
-            />
+            <div className="flex gap-2 items-center">
+              <input 
+                type="range" min="10" max="60" step="1"
+                value={customStyle.marginV}
+                onChange={e => {
+                  handleStyleChange('marginV', parseInt(e.target.value, 10));
+                  triggerTempGuides();
+                }}
+                className="v9-timeline-dial-slider flex-1"
+              />
+              <input 
+                type="number" min="4" max="80" step="1"
+                value={customStyle.marginV}
+                onChange={e => {
+                  const v = Math.max(4, Math.min(80, parseInt(e.target.value) || 20));
+                  handleStyleChange('marginV', v);
+                  triggerTempGuides();
+                }}
+                className="w-14 bg-white/[0.04] border border-white/10 rounded px-1.5 py-0.5 text-xs font-mono text-center"
+              />
+            </div>
+          </div>
+
+          {/* 新增：整体缩放（之前模型支持但 UI 隐藏，导致用户体验差） */}
+          <div className="flex flex-col gap-1.5 pt-1 border-t border-white/10">
+            <div className="flex justify-between text-xs font-medium text-white/80">
+              <span>整体缩放 (Global Scale)</span>
+              <span className="font-mono text-accent-gold">{(customStyle.globalScale ?? 1).toFixed(2)}×</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <input 
+                type="range" min="0.6" max="1.8" step="0.05"
+                value={customStyle.globalScale ?? 1}
+                onChange={e => handleStyleChange('globalScale', parseFloat(e.target.value))}
+                className="v9-timeline-dial-slider flex-1"
+              />
+              <input 
+                type="number" min="0.5" max="2.5" step="0.05"
+                value={(customStyle.globalScale ?? 1).toFixed(2)}
+                onChange={e => handleStyleChange('globalScale', Math.max(0.5, Math.min(2.5, parseFloat(e.target.value) || 1)))}
+                className="w-14 bg-white/[0.04] border border-white/10 rounded px-1.5 py-0.5 text-xs font-mono text-center"
+              />
+            </div>
+            <div className="text-[9px] text-text-secondary">一键整体放大/缩小所有字幕与边距，推荐 0.85~1.15 微调</div>
           </div>
         </div>
 
@@ -277,6 +330,44 @@ export const StyleSidebar: React.FC = () => {
               <option value="1080p">全高清 1080p</option>
               <option value="4K">超高清 4K</option>
             </select>
+          </div>
+
+          {/* 字体家族选择（核心审美改进：让用户真正控制中英观感） */}
+          <div className="flex flex-col gap-3 pt-2 border-t border-white/10">
+            <span className="text-[9px] text-text-secondary font-bold uppercase tracking-wider">字体家族 (预览优先)</span>
+            
+            <div className="flex flex-col gap-1.5">
+              <div className="flex justify-between text-[9px] text-white/70">
+                <span>中文字体</span>
+              </div>
+              <select
+                className="w-full h-8 bg-white/[0.03] border border-white/10 rounded-lg text-xs px-2 text-white outline-none focus:border-accent-gold/50"
+                value={customStyle.zhFontFamily || 'system-ui, sans-serif'}
+                onChange={e => handleStyleChange('zhFontFamily', e.target.value)}
+              >
+                <option value="system-ui, sans-serif">系统默认 (system-ui)</option>
+                <option value="'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif">苹方 / 黑体 (推荐中文字幕)</option>
+                <option value="'Noto Sans SC', 'Source Han Sans', system-ui, sans-serif">思源黑体 / Noto Sans SC</option>
+                <option value="'Microsoft YaHei', '微软雅黑', system-ui, sans-serif">微软雅黑</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <div className="flex justify-between text-[9px] text-white/70">
+                <span>英文字体</span>
+              </div>
+              <select
+                className="w-full h-8 bg-white/[0.03] border border-white/10 rounded-lg text-xs px-2 text-white outline-none focus:border-accent-gold/50"
+                value={customStyle.enFontFamily || 'Helvetica Neue, Arial, sans-serif'}
+                onChange={e => handleStyleChange('enFontFamily', e.target.value)}
+              >
+                <option value="Helvetica Neue, Arial, sans-serif">Helvetica Neue / Arial (经典)</option>
+                <option value="system-ui, -apple-system, BlinkMacSystemFont, sans-serif">系统默认 (system-ui)</option>
+                <option value="'Inter', system-ui, sans-serif">Inter (现代无衬线)</option>
+                <option value="'SF Pro Text', -apple-system, system-ui, sans-serif">SF Pro (Apple 电影感)</option>
+              </select>
+            </div>
+            <div className="text-[9px] text-text-secondary">字体选择主要影响预览观感，导出 ASS 时会尽量使用对应 Fontname。</div>
           </div>
         </div>
 
@@ -301,8 +392,8 @@ export const StyleSidebar: React.FC = () => {
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
                     <div className="flex justify-between text-xs font-medium text-white/80">
-                      <span>歌词字号 (Lyric Font)</span>
-                      <span className="font-mono text-accent-gold">{customStyle.lyricFontSize ?? 16}px</span>
+                      <span>歌词字号 (参考单位 / ASS)</span>
+                      <span className="font-mono text-accent-gold">{customStyle.lyricFontSize ?? 16}</span>
                     </div>
                     <input 
                       type="range" min="10" max="30" 
@@ -345,6 +436,33 @@ export const StyleSidebar: React.FC = () => {
               )}
             </div>
           )}
+        </div>
+
+        {/* 高级隐藏设置 - TMDB Key 配置（响应用户“未来进行隐藏设置”要求；原代码中为硬编码，已彻底移除） */}
+        <div className="mt-4 pt-3 border-t border-white/10">
+          <details className="group">
+            <summary className="cursor-pointer text-[9px] text-text-secondary font-bold uppercase tracking-wider flex items-center justify-between hover:text-white/70">
+              高级设置（隐藏）- TMDB API Key
+              <span className="text-[10px] opacity-60 group-open:rotate-180 transition">▼</span>
+            </summary>
+            <div className="mt-2 text-[10px] text-white/60 leading-relaxed">
+              用于剧照检索与预览场景背景。Key 仅保存在本地 localStorage，永不提交仓库。留空则 TMDB 相关功能（换张剧照、元数据）会提示配置。
+              <input
+                type="password"
+                placeholder="输入你的 TMDB API Key (v3)"
+                className="mt-2 w-full bg-white/[0.03] border border-white/10 text-xs px-2 py-1 rounded font-mono focus:outline-none focus:border-accent-gold/60"
+                defaultValue={useStudioStore.getState().tmdbApiKey || ''}
+                onBlur={(e) => {
+                  const val = e.target.value.trim();
+                  if (val) {
+                    useStudioStore.getState().setTmdbApiKey(val);
+                    alert('TMDB Key 已隐藏保存（localStorage）。下次刷新或操作自动使用。');
+                  }
+                }}
+              />
+              <div className="mt-1 text-[9px] opacity-50">获取地址：themoviedb.org → Settings → API</div>
+            </div>
+          </details>
         </div>
       </div>
     </div>
