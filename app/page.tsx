@@ -28,17 +28,17 @@ export default function Home() {
         {workflowStep === 3 && <TheaterStep />}
       </div>
 
-      {/* Global Toast Logs System (Sonner Style Bottom-Right) */}
-      <div className="fixed bottom-6 right-6 z-[2200] flex flex-col items-end justify-end gap-3 pointer-events-none">
+      {/* Global Toast Logs System (Sonner Style Top-Center) - exact match to final NAS archived version for middle-top fade in/out */}
+      <div className="fixed top-[72px] left-1/2 -translate-x-1/2 z-[2200] flex flex-col items-center justify-start gap-2.5 pointer-events-none w-full max-w-sm px-4">
         {logs.map((l, idx) => (
           <div 
             key={l.id} 
-            className={`px-4 py-3 rounded-xl border backdrop-blur-xl text-sm font-semibold tracking-wide shadow-[0_8px_30px_rgb(0,0,0,0.4)] transition-all duration-400 pointer-events-auto flex items-center min-w-[280px] max-w-md break-words
+            className={`px-4 py-2.5 rounded-xl border backdrop-blur-xl text-sm font-semibold tracking-wide shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all duration-400 pointer-events-auto flex items-center w-full break-words
               ${l.type === 'success' ? 'bg-[#061c12]/95 border-emerald-500/20 text-emerald-400' : 
                 l.type === 'error' ? 'bg-[#1f0a0a]/95 border-rose-500/20 text-rose-400' : 
                 'bg-[#121216]/95 border-white/10 text-white/90'}
-              ${l.fade ? 'opacity-0 translate-y-4 scale-95' : 'opacity-100 translate-y-0 scale-100'}
-              hover:-translate-y-1 origin-bottom`}
+              ${l.fade ? 'opacity-0 -translate-y-4 scale-95' : 'opacity-100 translate-y-0 scale-100'}
+              hover:translate-y-0.5 origin-top`}
           >
             {l.type === 'success' && <span className="mr-2.5 text-emerald-500">✓</span>}
             {l.type === 'error' && <span className="mr-2.5 text-rose-500">✕</span>}
