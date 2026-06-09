@@ -43,6 +43,13 @@ export const TheaterStep: React.FC = () => {
     }
   };
 
+  // Ensure a default scene backdrop in 放映厅模式 so the preview always has visual "遮罩"/frame like NAS version
+  useEffect(() => {
+    if (!sceneBackground || sceneBackground === 'solid') {
+      setSceneBackground('cinema');
+    }
+  }, [sceneBackground, setSceneBackground]);
+
   // Convert processedSubs to SubtitleDataSlot
   const subtitleSlot: SubtitleDataSlot = processedSubs
     ? { status: 'ready', data: processedSubs }

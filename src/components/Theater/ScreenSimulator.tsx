@@ -244,28 +244,35 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
           alt="TV Frame Mask" 
         />
 
-        {/* Physical Screen Black Background (the "glass" screen area) */}
+        {/* Physical Screen / TV Glass Area - now with backdrop filling the framed screen like NAS version */}
         <div 
-          className="absolute bg-[#000] flex items-center justify-center overflow-hidden z-10"
+          className="absolute overflow-hidden z-10"
           style={{
             left: screenPos.left,
             top: screenPos.top,
             width: screenPos.width,
             height: screenPos.height,
-            containerType: 'size'
+            backgroundColor: '#000',
+            ...getBackdropStyle()
           }}
         >
-          {/* Inner Movie Canvas */}
+          {/* Inner Movie Content Area (letterboxed if needed by aspect) */}
           <div 
-            className="relative flex-shrink-0 bg-[#070709] transition-all duration-300 overflow-hidden"
+            className="absolute inset-0 flex items-center justify-center"
             style={{
-              aspectRatio: innerAspect,
-              width: '10000px', // Forces it to expand
-              maxWidth: '100%', // Capped by physical screen width
-              maxHeight: '100%', // Capped by physical screen height
-              ...getBackdropStyle()
+              backgroundColor: 'transparent'
             }}
-          />
+          >
+            <div 
+              className="relative bg-[#070709] overflow-hidden"
+              style={{
+                aspectRatio: innerAspect,
+                width: '100%',
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
+            />
+          </div>
 
           {/* Render State Machine driving Canvas details */}
           {subtitle.status === 'idle' && (
