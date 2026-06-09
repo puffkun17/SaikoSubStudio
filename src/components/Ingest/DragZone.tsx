@@ -464,50 +464,112 @@ export const DragZone: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Drag-over state content overlay */}
+        {/* Custom cinematic Ingest Lens icon (no generic AI cloud) */}
         {isDragging ? (
           <div className="flex flex-col items-center gap-3 z-20">
             <motion.div
-              animate={{ y: [-4, 4, -4] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              animate={{ y: [-3, 3, -3] }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
             >
-              <UploadCloud className="w-12 h-12 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
+              {/* Custom aperture + waveform lens for drag state */}
+              <svg width="52" height="52" viewBox="0 0 52 52" fill="none" className="drop-shadow-[0_0_12px_rgba(16,185,129,0.65)]">
+                <circle cx="26" cy="26" r="23" stroke="#10b981" strokeWidth="1.5" strokeOpacity="0.6"/>
+                <g stroke="#10b981" strokeWidth="1.25" strokeOpacity="0.9">
+                  <path d="M26 9 L26 17" />
+                  <path d="M26 35 L26 43" />
+                  <path d="M9 26 L17 26" />
+                  <path d="M35 26 L43 26" />
+                  <path d="M13.5 13.5 L19 19" />
+                  <path d="M33 33 L38.5 38.5" />
+                  <path d="M38.5 13.5 L33 19" />
+                  <path d="M19 33 L13.5 38.5" />
+                </g>
+                {/* Subtle dual waveform inside for dual-track subtitle identity */}
+                <path d="M18 26 Q21 22 24 26 Q27 30 30 26" stroke="#34d399" strokeWidth="1.1" fill="none" strokeOpacity="0.85"/>
+                <path d="M18 29 Q21 25 24 29 Q27 33 30 29" stroke="#34d399" strokeWidth="0.9" fill="none" strokeOpacity="0.6"/>
+              </svg>
             </motion.div>
-            <span className="text-xs font-mono uppercase tracking-[0.2em] text-emerald-400 font-bold">RELEASE TO INGEST</span>
+            <span className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-400 font-bold">RELEASE TO INGEST</span>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4 z-20">
-            <UploadCloud className={`w-12 h-12 transition-all duration-300 
-              ${isZoneActive ? 'text-violet-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]' : 'text-neutral-500'}`} />
-            
-            <div className="flex flex-col gap-1 items-center px-4">
-              <span className="text-sm font-mono font-bold tracking-[0.2em] text-white/90">INGEST LENS</span>
-              <span className="text-xs text-neutral-500 tracking-[0.05em] uppercase font-sans">drag files here</span>
+          <div className="flex flex-col items-center gap-5 z-20">
+            {/* Custom premium Ingest Lens icon - aperture + dual subtitle tracks */}
+            <div className="relative">
+              <svg 
+                width="56" height="56" 
+                viewBox="0 0 56 56" 
+                fill="none" 
+                className={`transition-all duration-300 ${isZoneActive ? 'text-violet-400 drop-shadow-[0_0_14px_rgba(168,85,247,0.55)]' : 'text-neutral-400/70'}`}
+              >
+                {/* Outer aperture ring */}
+                <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.25" strokeOpacity="0.55" />
+                
+                {/* Blade / aperture segments for cinematic lens personality */}
+                <g stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.75">
+                  <path d="M28 5.5 L28 13" />
+                  <path d="M28 43 L28 50.5" />
+                  <path d="M5.5 28 L13 28" />
+                  <path d="M43 28 L50.5 28" />
+                  <path d="M10 10 L16.5 16.5" />
+                  <path d="M39.5 39.5 L46 46" />
+                  <path d="M46 10 L39.5 16.5" />
+                  <path d="M16.5 39.5 L10 46" />
+                </g>
+                
+                {/* Inner dual-track waveform (core identity: bilingual subtitle) */}
+                <path 
+                  d="M19 28 Q23 24 27 28 Q31 32 35 28" 
+                  stroke="currentColor" 
+                  strokeWidth="1.6" 
+                  strokeOpacity="0.9"
+                  fill="none" 
+                />
+                <path 
+                  d="M19 31.5 Q23 27.5 27 31.5 Q31 35.5 35 31.5" 
+                  stroke="currentColor" 
+                  strokeWidth="1.1" 
+                  strokeOpacity="0.55"
+                  fill="none" 
+                />
+                
+                {/* Subtle center highlight for lens glass */}
+                <circle cx="28" cy="28" r="6" fill="currentColor" fillOpacity="0.08" />
+              </svg>
             </div>
             
-            {/* Inline file extensions label */}
-            <div className="flex gap-2 text-xs font-mono text-neutral-600 tracking-wider">
-              <span>SRT</span>
-              <span>•</span>
-              <span>ASS</span>
-              <span>•</span>
-              <span>ZIP</span>
+            <div className="flex flex-col gap-1.5 items-center px-2 text-center">
+              <span className="text-[13px] font-mono font-bold tracking-[0.22em] text-white/95">INGEST LENS</span>
+              <span className="text-[10px] text-neutral-500 tracking-[0.08em] uppercase font-sans">DROP FILES INTO THE LENS</span>
+            </div>
+            
+            {/* Refined format indicators - more integrated, less generic */}
+            <div className="flex items-center gap-2 text-[10px] font-mono tracking-[0.2em] text-neutral-600">
+              <span className="px-1.5 py-px border border-white/10 rounded">SRT</span>
+              <span className="text-white/20">·</span>
+              <span className="px-1.5 py-px border border-white/10 rounded">ASS</span>
+              <span className="text-white/20">·</span>
+              <span className="px-1.5 py-px border border-white/10 rounded">ZIP</span>
             </div>
           </div>
         )}
       </motion.div>
 
-      {/* Floating Trigger Prism Buttons (No solid backgrounds, clean glassmorphism) */}
-      <div className="flex flex-col sm:flex-row gap-5 justify-center mt-10 w-full sm:w-auto px-4 z-20">
+      {/* Refined action buttons — stronger cinematic glass, better hierarchy and breathing */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mt-9 w-full sm:w-auto px-4 z-20">
         <button 
-          className="w-full sm:w-auto px-8 py-3 bg-violet-500/[0.04] text-white hover:text-violet-200 border border-white/[0.04] hover:border-violet-500/25 shadow-[0_4px_12px_rgba(0,0,0,0.4)] hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:-translate-y-0.5 rounded-full transition-all duration-300 text-center font-mono text-xs md:text-sm uppercase tracking-widest font-semibold cursor-pointer"
           onClick={() => fileInputRef.current?.click()}
+          className="group w-full sm:w-auto px-9 py-3.5 rounded-2xl text-sm font-mono uppercase tracking-[0.12em] font-semibold cursor-pointer transition-all duration-200 
+            bg-white/[0.022] hover:bg-violet-500/5 border border-white/[0.055] hover:border-violet-500/30 
+            text-white/90 hover:text-white shadow-[0_2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_0_18px_rgba(168,85,247,0.12)] active:scale-[0.985]"
         >
           浏览文件 / ZIP
         </button>
+        
         <button 
-          className="w-full sm:w-auto px-8 py-3 bg-white/[0.01] text-neutral-400 hover:text-neutral-200 border border-white/[0.04] hover:border-white/[0.1] shadow-[0_4px_12px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 rounded-full transition-all duration-300 text-center font-mono text-xs md:text-sm uppercase tracking-widest font-semibold cursor-pointer"
           onClick={() => folderInputRef.current?.click()}
+          className="group w-full sm:w-auto px-9 py-3.5 rounded-2xl text-sm font-mono uppercase tracking-[0.12em] font-semibold cursor-pointer transition-all duration-200 
+            bg-white/[0.01] hover:bg-white/[0.035] border border-white/[0.04] hover:border-white/15 
+            text-neutral-400 hover:text-neutral-100 shadow-[0_2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_0_14px_rgba(255,255,255,0.06)] active:scale-[0.985]"
         >
           扫描文件夹
         </button>

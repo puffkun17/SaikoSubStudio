@@ -66,7 +66,7 @@ These enable the "模拟场景" and full Theater without external deps.
 
 ## Version
 
-Visible in bottom-right on hosted: `v2.0.0-hosted (clean re-extraction + pre-configured TMDB)`
+Visible in bottom-right on hosted: `v2.0.1 (Ingest Lens redesign + history modal polish + cinematic UI refinements)`
 
 ## History / Credits
 
