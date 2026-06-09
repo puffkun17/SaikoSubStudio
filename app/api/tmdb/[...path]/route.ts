@@ -6,7 +6,8 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 
 // Server-side TMDB proxy for cf-pages-hosted (pre-configured with CF secret).
 // Full NAS-like experience: no client key prompt, seamless 剧照 and metadata.
-// Set TMDB_API_KEY in CF Pages dashboard (Production, as Secret) - v4 JWT preferred.
+// TMDB_API_KEY must be set in CF Pages dashboard as a Secret (机密) for Production.
+// Never declare real secrets in wrangler.toml — it would make the key a plain-text var.
 
 export async function GET(
   request: NextRequest,

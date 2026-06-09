@@ -50,11 +50,10 @@ See `.env.example` and the proxy route for details.
 - Production branch: `cf-pages-hosted`.
 - Build command: `npm ci --legacy-peer-deps && npm run pages:build`
 - Build output directory: `.vercel/output/static`
-- **Secret**: `TMDB_API_KEY` (your v4 token) set via dashboard or `wrangler pages secret put` (Production).
+- **Secret**: `TMDB_API_KEY` (your v4 token) set **only** via dashboard (as "机密"/Secret) or `wrangler pages secret put` (Production).
+  - Do **not** declare it in wrangler.toml (that would register it as a plain-text var).
 - Pushes to branch auto-build and deploy.
 - Custom domain dualsubs.quest points to production deployment.
-
-wrangler.toml declares the placeholder var (real value from secret).
 
 ## Public Assets (Fixed for Preview)
 

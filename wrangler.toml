@@ -6,20 +6,23 @@ pages_build_output_dir = ".vercel/output/static"
 # nodejs_compat is required for @cloudflare/next-on-pages
 # because the adapter and some dependencies (jszip, etc.) use Node.js APIs.
 
-# Environment variables for the hosted CF Pages version (cf-pages-hosted branch).
-# These are available to Pages Functions (e.g. the TMDB proxy at /api/tmdb).
+# Secrets (sensitive values like API keys) must NOT be declared in this file.
 #
-# IMPORTANT:
-# - Do NOT put real secret values in this file or in the repo.
-# - Declare the variable name here (with empty value) so the build and runtime recognize it.
-# - Set the actual secret value ONLY in the Cloudflare Pages dashboard:
-#     Settings > Environment variables (Production) > Add TMDB_API_KEY
-#     Paste your v4 Read Access Token (the JWT).
-#     Mark it as "Secret".
+# For the cf-pages-hosted (production) deployment on Cloudflare Pages:
+# - Add sensitive keys (e.g. TMDB_API_KEY) **only** as "机密" (Secret / encrypted variable)
+#   in the Cloudflare Pages dashboard:
+#     Settings > Environment variables (Production) > Add
+#     Name: TMDB_API_KEY
+#     Value: your TMDB v4 Read Access Token (the JWT starting with eyJ...)
+#     Type: 机密 (Secret)
 #
-# For local dev: use .env.local (never commit) or `wrangler pages dev --env production`.
-[vars]
-TMDB_API_KEY = ""  # Placeholder only. Real value from CF dashboard secret.
-
-# For the public main branch (open-source self-host): users configure their own key
-# via .env.local or their own CF dashboard. No keys are baked in.
+# Do NOT put real secret values in wrangler.toml or anywhere in the repo.
+# Using [vars] would register the key as a plain-text environment variable
+# (managed by this file), which prevents proper Secret management in the dashboard.
+#
+# For local development:
+# - Copy .env.example to .env.local and fill in TMDB_API_KEY (never commit .env.local)
+# - Or run: wrangler pages dev .vercel/output/static --env production
+#
+# For the public main branch (open-source / self-host): users set their own key
+# via .env.local or their own hosting provider's secrets. No keys are baked in.
