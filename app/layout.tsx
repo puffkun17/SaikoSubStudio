@@ -18,9 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="pt-14 min-h-[calc(100dvh-56px)]">
           {children}
         </div>
-        {/* Version indicator - for cf-pages-hosted: clean NAS re-extraction (lossless per principle), pre-configured TMDB via CF secret, full experience */}
+        {/* Version indicator - for cf-pages-hosted: clean NAS re-extraction (lossless per principle), pre-configured TMDB via CF secret, full experience. Secret attached via CLI + latest deploy. */}
         <div className="fixed bottom-1 right-2 text-[9px] text-white/20 font-mono pointer-events-none select-none">
-          v2.0.0-hosted (clean re-extraction + pre-configured TMDB)
+          v2.0.1-hosted (clean re-extraction + pre-configured TMDB) - post-secret
         </div>
       </body>
     </html>
