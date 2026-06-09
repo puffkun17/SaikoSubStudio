@@ -1,0 +1,25 @@
+name = "saikosubstudio"
+compatibility_date = "2025-06-01"
+compatibility_flags = [ "nodejs_compat" ]
+pages_build_output_dir = ".vercel/output/static"
+
+# nodejs_compat is required for @cloudflare/next-on-pages
+# because the adapter and some dependencies (jszip, etc.) use Node.js APIs.
+
+# Environment variables for the hosted CF Pages version (cf-pages-hosted branch).
+# These are available to Pages Functions (e.g. the TMDB proxy at /api/tmdb).
+#
+# IMPORTANT:
+# - Do NOT put real secret values in this file or in the repo.
+# - Declare the variable name here (with empty value) so the build and runtime recognize it.
+# - Set the actual secret value ONLY in the Cloudflare Pages dashboard:
+#     Settings > Environment variables (Production) > Add TMDB_API_KEY
+#     Paste your v4 Read Access Token (the JWT).
+#     Mark it as "Secret".
+#
+# For local dev: use .env.local (never commit) or `wrangler pages dev --env production`.
+[vars]
+TMDB_API_KEY = ""  # Placeholder only. Real value from CF dashboard secret.
+
+# For the public main branch (open-source self-host): users configure their own key
+# via .env.local or their own CF dashboard. No keys are baked in.

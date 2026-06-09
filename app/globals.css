@@ -1,0 +1,569 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans CN", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", "PingFang SC", "Microsoft YaHei", monospace;
+  --color-accent-neon: #a855f7;
+  --color-accent-glow: rgba(168, 85, 247, 0.12);
+  --color-accent-emerald: #10b981;
+  --color-accent-emerald-glow: rgba(16, 185, 129, 0.12);
+  --color-bg-dark: #050507;
+  --color-bg-base: #08080c;
+  --color-surface-base: rgba(255, 255, 255, 0.02);
+  --color-surface-elevated: rgba(255, 255, 255, 0.05);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.45);
+  --color-glass-border: rgba(255, 255, 255, 0.06);
+  --color-surface-0: #010102;
+  --color-surface-1: #06060a;
+  --color-surface-2: #0b0b12;
+  --color-surface-3: #10101a;
+  
+  --text-h1: 3.815rem;
+  --text-h4: 1.953rem;
+  --text-h6: 1.25rem;
+}
+
+:root {
+  --background: #030305;
+  --foreground: #ffffff;
+}
+
+h1 {
+  font-size: var(--text-h1);
+}
+h4 {
+  font-size: var(--text-h4);
+}
+h6 {
+  font-size: var(--text-h6);
+  font-weight: normal;
+}
+
+html {
+  font-size: calc(18px * var(--site-scale, 1));
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Global button push feedback */
+button:active {
+  transform: scale(0.97);
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Cinematic Film Grain Noise Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Custom Webkit scrollbar for premium look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-neon);
+}
+
+/* Keyframe animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes breatheGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.35);
+  }
+}
+
+.breathe-glow {
+  animation: breatheGlow 4s infinite ease-in-out;
+}
+
+/* Aurora Backdrop Glow Animations for Space Depth */
+@keyframes auroraBreathe {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.05;
+  }
+  33% {
+    transform: translate(4% , -5%) scale(1.08);
+    opacity: 0.07;
+  }
+  66% {
+    transform: translate(-3%, 6%) scale(0.95);
+    opacity: 0.06;
+  }
+}
+
+.bg-aurora-glow-purple {
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.15) 0%, transparent 65%);
+  animation: auroraBreathe 14s infinite ease-in-out;
+}
+
+.bg-aurora-glow-emerald {
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, transparent 65%);
+  animation: auroraBreathe 18s infinite ease-in-out;
+  animation-delay: -5s;
+}
+
+/* ==========================================================================
+   AR Ambient Glow for Screens (Borderless Panoramic look)
+   ========================================================================== */
+.ar-ambient-glow {
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  right: -5%;
+  bottom: -5%;
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.04) 0%, transparent 75%);
+  z-index: 1;
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+/* Alignment Guide Lines - Simplified Neon style */
+.v9-canvas-guide-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-bottom: 1px dashed rgba(168, 85, 247, 0.45);
+  z-index: 40;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.v9-canvas-guide-badge {
+  position: absolute;
+  left: 16px;
+  bottom: 4px;
+  font-size: 0.65rem;
+  color: #ffffff;
+  background: rgba(168, 85, 247, 0.75);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Horizontal Dial Wheel Selector for aspect ratio and scenes */
+.v9-wheel-selector {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.v9-wheel-fade-left {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  background: linear-gradient(90deg, #050507 0%, transparent 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.v9-wheel-fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  background: linear-gradient(-90deg, #050507 0%, transparent 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.v9-wheel-center-indicator {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 38px;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  background: rgba(168, 85, 247, 0.04);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.v9-wheel-track {
+  display: flex;
+  align-items: center;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.v9-wheel-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.v9-wheel-item:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.v9-wheel-item.active {
+  color: #c084fc;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+}
+
+.v9-wheel-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.v9-wheel-desc {
+  font-size: 0.55rem;
+  margin-top: 1px;
+  font-weight: 500;
+}
+
+/* Dial Gauge Form Style */
+.v9-dial-gauge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 4px 12px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.v9-dial-gauge-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.v9-dial-gauge-input {
+  width: 48px;
+  background: transparent;
+  border: none;
+  color: #c084fc;
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 0.8rem;
+  outline: none;
+  text-align: center;
+}
+
+.v9-dial-gauge-value {
+  font-size: 0.75rem;
+  color: #ffffff;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+/* Range input styling for dial slider */
+.v9-timeline-dial-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+  cursor: pointer;
+}
+
+.v9-timeline-dial-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.3) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.v9-timeline-dial-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #c084fc;
+  border: 2px solid #08080c;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+  margin-top: -4px;
+  transition: transform 0.15s;
+}
+
+.v9-timeline-dial-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Hide Spinners in input number */
+.no-spin::-webkit-inner-spin-button,
+.no-spin::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Accessibility Typography Adjustments (Device, Browser & DPI Adapted)
+   ========================================================================== */
+
+/* Adjust font sizing on smaller viewports and mobile screens */
+@media (max-width: 640px) {
+  .text-\[9px\] {
+    font-size: 11px !important;
+  }
+  .text-\[10px\] {
+    font-size: 11.5px !important;
+  }
+  .text-xs {
+    font-size: 13px !important;
+  }
+}
+
+/* Mobile UA specific font sizing boost */
+html.ua-mobile .text-\[9px\] {
+  font-size: 11px !important;
+}
+html.ua-mobile .text-\[10px\] {
+  font-size: 12px !important;
+}
+html.ua-mobile .text-xs {
+  font-size: 13px !important;
+}
+
+/* Safari browser-specific sub-12px readability enhancements */
+html.ua-safari .text-\[9px\] {
+  font-size: 10px !important;
+}
+html.ua-safari .text-\[10px\] {
+  font-size: 11.5px !important;
+}
+html.ua-safari .text-xs {
+  font-size: 13px !important;
+}
+
+/* Retina (High DPI) displays readability optimization */
+html.screen-retina .text-\[9px\] {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+html.screen-retina .text-\[10px\] {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+html.screen-retina .text-xs {
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Letter-spacing adjustment for small monospaced labels to prevent compression blur */
+html.ua-mobile .font-mono,
+html.ua-safari .font-mono {
+  letter-spacing: 0.03em !important;
+}
+
+/* ==========================================================================
+   AR Glassmorphism (全半透明 AR 风格界面) Core Utilities
+   ========================================================================== */
+
+.glass-panel-ar {
+  background: rgba(255, 255, 255, 0.008);
+  backdrop-filter: blur(36px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 30px rgba(168, 85, 247, 0.02);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-btn-ar {
+  background: rgba(255, 255, 255, 0.012);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-btn-ar:hover {
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.02);
+}
+
+.glass-btn-ar:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.glass-btn-ar-active {
+  background: rgba(168, 85, 247, 0.06) !important;
+  border-color: rgba(168, 85, 247, 0.35) !important;
+  color: #c084fc !important;
+  box-shadow: 
+    inset 0 1px 1px rgba(168, 85, 247, 0.15),
+    0 0 20px rgba(168, 85, 247, 0.18) !important;
+}
+
+/* Glass Range Input */
+.glass-slider-input {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.glass-slider-input::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+}
+
+.glass-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2.5px solid #a855f7;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+  margin-top: -4px;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.glass-slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.glass-slider-input::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+  background: #c084fc;
+}
+
+/* Glass recessed slot */
+.glass-slot-inset {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+/* Lens Focus Modes (景深虚化与放大透镜效果) */
+.glass-blur-inactive {
+  opacity: 0.35 !important;
+  filter: blur(0.5px) grayscale(20%);
+  transform: scale(0.985);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-lens-active {
+  background: rgba(255, 255, 255, 0.035) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    0 0 15px rgba(168, 85, 247, 0.05);
+  transform: scale(1.008);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Custom Slim Scrollbar for AR theme */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  transition: all 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.35) !important;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6) !important;
+}
+
+/* ==========================================================================
+   Height-Aware Layout Optimizations
+   Prevents vertical content clipping on short screens or split views.
+   ========================================================================== */
+@media (min-width: 1024px) and (min-height: 800px) {
+  .desktop-panel-fit-hidden {
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  .desktop-panel-fit-visible {
+    height: 100% !important;
+    overflow: visible !important;
+  }
+}
+@media (max-width: 1023px), (max-height: 799px) {
+  .desktop-panel-fit-hidden {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .desktop-panel-fit-visible {
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+
