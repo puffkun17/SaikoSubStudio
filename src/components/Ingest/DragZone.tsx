@@ -425,46 +425,61 @@ export const DragZone: React.FC = () => {
         className="relative w-80 h-80 rounded-full flex flex-col items-center justify-center cursor-pointer transition-all duration-300 select-none z-10"
       >
         <ParticleCanvas mode={isDragging ? 'dragging' : (isZoneActive ? 'hover' : 'idle')} />
-        <div className="absolute inset-[-20px] bg-gradient-to-tr from-violet-600/[0.01] via-fuchsia-600/[0.005] to-transparent rounded-full filter blur-3xl opacity-60 group-hover/outer:opacity-100 transition-opacity duration-500 -z-20" />
+        {/* Subtle color wash toned down for Windows Chrome color cast issues */}
+        <div className="absolute inset-[-20px] bg-gradient-to-tr from-violet-600/[0.004] via-fuchsia-600/[0.002] to-transparent rounded-full filter blur-3xl opacity-25 group-hover/outer:opacity-50 transition-opacity duration-500 -z-20" />
 
-        {/* Double-layered intersection concentric dashed holographic rings */}
+        {/* Bauhaus-inspired geometric composition（包豪斯风格几何构图）: 
+            强调干净的原色线条、圆形与直线的精确相交、功能性构图，而非过度装饰的虚线旋转环。
+            保留缓慢的机械式旋转以体现专业、精确的“镜头”感，同时增加不对称的动态元素。
+        */}
+        {/* Central bold circle + precise cross (Bauhaus primary elements) */}
+        <div className={`absolute inset-[18%] rounded-full border-2 transition-all duration-300
+          ${isDragging ? 'border-emerald-500/60' : isZoneActive ? 'border-violet-400/70' : 'border-white/15'}`} />
+        
+        {/* Horizontal and vertical construction lines */}
+        <div className={`absolute left-[15%] right-[15%] top-1/2 h-px -translate-y-1/2 transition-all duration-300
+          ${isDragging ? 'bg-emerald-500/50' : isZoneActive ? 'bg-violet-400/60' : 'bg-white/10'}`} />
+        <div className={`absolute top-[15%] bottom-[15%] left-1/2 w-px -translate-x-1/2 transition-all duration-300
+          ${isDragging ? 'bg-emerald-500/50' : isZoneActive ? 'bg-violet-400/60' : 'bg-white/10'}`} />
+
+        {/* Slow rotating geometric accent (small triangle + arc for dynamic Bauhaus asymmetry) */}
         <motion.div 
           animate={{ rotate: 360 }}
-          transition={{ duration: isDragging ? 6 : (isZoneActive ? 12 : 24), repeat: Infinity, ease: "linear" }}
-          className={`absolute inset-0 border border-dashed rounded-full transition-colors duration-300
-            ${isDragging 
-              ? 'border-emerald-500/35' 
-              : isZoneActive 
-                ? 'border-violet-500/40' 
-                : 'border-white/10'}`}
-        />
-        
-        <motion.div 
-          animate={{ rotate: -360 }}
-          transition={{ duration: isDragging ? 10 : (isZoneActive ? 18 : 36), repeat: Infinity, ease: "linear" }}
-          className={`absolute inset-4 border border-dotted rounded-full transition-colors duration-300
-            ${isDragging 
-              ? 'border-emerald-500/25' 
-              : isZoneActive 
-                ? 'border-violet-500/25' 
-                : 'border-white/5'}`}
-        />
-
-        {/* Outer neon pulse rings */}
-        <AnimatePresence>
-          {(isZoneActive || isDragging) && (
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1.15, opacity: [0, 0.4, 0] }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-              className={`absolute -inset-4 border rounded-full pointer-events-none -z-20
-                ${isDragging ? 'border-emerald-500/30' : 'border-violet-500/30'}`}
+          transition={{ duration: isDragging ? 8 : (isZoneActive ? 18 : 32), repeat: Infinity, ease: "linear" }}
+          className="absolute inset-[22%] pointer-events-none"
+        >
+          {/* Small triangle accent */}
+          <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] transition-colors
+            ${isDragging ? 'border-b-emerald-500/70' : isZoneActive ? 'border-b-violet-400/80' : 'border-b-white/20'}`} />
+          {/* Subtle arc */}
+          <svg className="absolute inset-0" viewBox="0 0 100 100">
+            <path 
+              d="M 20 80 A 30 30 0 0 1 80 80" 
+              fill="none" 
+              stroke={isDragging ? "#10b981" : isZoneActive ? "#a855f7" : "#ffffff"} 
+              strokeWidth="1.5" 
+              strokeOpacity={isDragging ? "0.5" : isZoneActive ? "0.6" : "0.15"} 
             />
-          )}
-        </AnimatePresence>
+          </svg>
+        </motion.div>
 
-        {/* Custom cinematic Ingest Lens icon (no generic AI cloud) */}
+        {/* Subtle outer construction frame (Bauhaus rectangle influence) */}
+        <div className={`absolute -inset-[6px] border transition-colors duration-300
+          ${isDragging ? 'border-emerald-500/20' : isZoneActive ? 'border-violet-500/25' : 'border-white/5'}`} />
+
+        {/* Enhanced hover interaction for Bauhaus elements: precise "snap" alignment feel */}
+        <motion.div 
+          animate={isZoneActive ? { scale: 1.02 } : { scale: 1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          className="absolute inset-0 pointer-events-none"
+        />
+
+        {/* 
+          Custom cinematic Ingest Lens icon (no generic AI cloud)
+          - aperture（光圈）: 多叶片结构，模拟真实相机/投影机镜头，增加电影感。
+          - dual-track waveform（双轨波形）: 两条波浪线代表双语字幕（中英轨），这是本工具的核心身份。
+          这个 SVG 比 <UploadCloud> 更有领域特征（domain-specific），避免 AI 模板感。
+        */}
         {isDragging ? (
           <div className="flex flex-col items-center gap-3 z-20">
             <motion.div

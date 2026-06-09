@@ -44,6 +44,9 @@ html {
   font-size: calc(18px * var(--site-scale, 1));
   height: 100%;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -54,6 +57,8 @@ body {
   margin: 0;
   overflow: hidden;
   font-variant-numeric: tabular-nums;
+  /* Help reduce color shift and noise visibility on Windows Chrome */
+  transform: translateZ(0);
 }
 
 /* Global button push feedback */
@@ -62,15 +67,22 @@ button:active {
   transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* Cinematic Film Grain Noise Overlay */
+/* Cinematic Film Grain Noise Overlay - toned down for cross-platform (esp. Windows Chrome) */
+/* 
+  film-grain（电影胶片噪点）: 用 SVG feTurbulence 生成的随机噪声纹理，
+  模拟真实胶片颗粒感。baseFrequency 控制颗粒粗细，opacity 控制强度。
+  mix-blend-mode: screen 让它在深色背景上更柔和，避免 Windows Chrome 下出现明显“底纹”。
+  z-index: 9999 确保它覆盖在最上层但不阻挡交互（pointer-events: none）。
+*/
 body::before {
   content: "";
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.008; /* 进一步降低以解决 Windows+Chrome 严重底纹问题，同时保留轻微电影胶片质感 */
   pointer-events: none;
   z-index: 9999;
+  mix-blend-mode: screen;
 }
 
 /* Custom Webkit scrollbar for premium look */
@@ -119,6 +131,12 @@ body::before {
 }
 
 /* Aurora Backdrop Glow Animations for Space Depth */
+/* 
+  glow（光晕/发光效果）: 通过 radial-gradient + animation 模拟远处光源的柔和发光。
+  常用于营造“空间深度”（space depth）和电影氛围。
+  auroraBreathe 动画通过 transform scale + opacity 变化，让光晕像极光一样缓慢呼吸。
+  这种效果在 IngestStep 的首页空状态和 Theater 预览中大量使用。
+*/
 @keyframes auroraBreathe {
   0%, 100% {
     transform: translate(0, 0) scale(1);
@@ -415,6 +433,13 @@ html.ua-safari .font-mono {
 /* ==========================================================================
    AR Glassmorphism (全半透明 AR 风格界面) Core Utilities
    ========================================================================== */
+/* 
+  glassmorphism（玻璃态/毛玻璃效果）: 当前项目最核心的 UI 风格。
+  特点是极低的背景不透明度 + backdrop-filter: blur() + 细边框 + 多层阴影。
+  给人“悬浮在空间中”的高级感和景深（depth）。
+  backdrop-filter 是关键属性，它会模糊元素后面的内容（类似真实玻璃）。
+  translateZ(0) 是常见的 GPU 加速技巧，强制浏览器创建新图层，提升 Windows Chrome 下的渲染一致性。
+*/
 
 .glass-panel-ar {
   background: rgba(255, 255, 255, 0.008);
@@ -425,6 +450,7 @@ html.ua-safari .font-mono {
     0 24px 60px rgba(0, 0, 0, 0.55),
     0 0 30px rgba(168, 85, 247, 0.02);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0); /* improve backdrop-filter consistency on Windows Chrome */
 }
 
 .glass-btn-ar {
@@ -434,6 +460,8 @@ html.ua-safari .font-mono {
   backdrop-filter: blur(10px);
   border-radius: 10px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0);
+  /* glass-btn-ar 是 glass-panel-ar 的按钮变体，blur 值较低（10px），更轻量，适合交互元素 */
 }
 
 .glass-btn-ar:hover {

@@ -22,16 +22,26 @@ export const IngestStep: React.FC = () => {
 
   return (
     <div className="flex-1 w-full h-full flex flex-col p-3 md:p-4 lg:p-5 2xl:p-6 lg:overflow-hidden overflow-y-auto relative bg-[#050507] z-0">
-      {/* Cinematic ambient lights - Violet Accent */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-violet-600/[0.03] rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-violet-600/[0.015] rounded-full blur-[120px] pointer-events-none -z-10" />
+      {/* Cinematic ambient lights - Violet Accent (toned down to reduce color cast on Windows Chrome) */}
+      {/* 
+        glow（环境光晕）: radial-gradient + 大 blur 值制造的柔和发光区域。
+        用来模拟“空间中的光源”，增加景深（depth）和电影氛围。
+        我们在这里把不透明度压得很低（0.018 / 0.01），因为多层 glow 在 Windows Chrome 上容易引起色差。
+      */}
+      <div className="absolute top-[-18%] left-[-8%] w-[50%] h-[50%] bg-violet-600/[0.012] rounded-full blur-[180px] pointer-events-none -z-10" />
+      <div className="absolute bottom-[-10%] right-[-6%] w-[40%] h-[40%] bg-violet-600/[0.006] rounded-full blur-[160px] pointer-events-none -z-10" />
 
-      {/* Tech Grid System (Aesthetic guide grid overlay) */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:5rem_5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
+      {/* Tech Grid System - heavily reduced to avoid moiré/visible texture on Windows Chrome + noise combo */}
+      {/* 
+        grid（背景网格）: 这里是用 CSS linear-gradient 模拟的极细格线（类似设计软件里的参考网格）。
+        作用是增加“技术感”和结构感，而不是真正的 CSS Grid 布局。
+        我们在 Windows Chrome 下大幅降低了不透明度，避免它和 film-grain 叠加产生明显底纹。
+      */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff01_1px,transparent_1px),linear-gradient(to_bottom,#ffffff01_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_55%_45%_at_50%_38%,#000_80%,transparent_100%)] opacity-40 pointer-events-none -z-10" />
       
-      {/* Hairline structural layout guides */}
-      <div className="absolute left-[5%] right-[5%] top-[14%] h-px bg-gradient-to-r from-transparent via-white/[0.03] to-transparent pointer-events-none -z-10" />
-      <div className="absolute left-[5%] right-[5%] bottom-[12%] h-px bg-gradient-to-r from-transparent via-white/[0.03] to-transparent pointer-events-none -z-10" />
+      {/* Hairline structural layout guides - reduced to avoid adding to visible texture on Windows */}
+      <div className="absolute left-[5%] right-[5%] top-[14%] h-px bg-gradient-to-r from-transparent via-white/[0.015] to-transparent pointer-events-none -z-10" />
+      <div className="absolute left-[5%] right-[5%] bottom-[12%] h-px bg-gradient-to-r from-transparent via-white/[0.015] to-transparent pointer-events-none -z-10" />
 
       {/* Micro-technical markings */}
       <div className="absolute top-4 left-6 text-[0.5625rem] font-mono text-neutral-600 tracking-[0.25em] select-none pointer-events-none uppercase">
