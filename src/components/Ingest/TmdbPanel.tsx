@@ -147,8 +147,7 @@ export const TmdbPanel: React.FC = () => {
                   )}
                   {rtScore && (
                     <span className="px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/15 rounded-md text-xs font-mono font-bold flex items-center gap-1.5 shadow-[0_0_8px_rgba(239,68,68,0.08)]">
-                      <img src="/Rotten_Tomatoes.png" alt="Rotten Tomatoes" className="w-3 h-3 object-contain" />
-                      {rtScore}%
+                      RT {rtScore}%
                     </span>
                   )}
                   {tmdbData.genres && tmdbData.genres.map((g: string, i: number) => (

@@ -244,13 +244,13 @@ export const TaskList: React.FC = () => {
           
           {/* Track Bindings - Wide horizontal card */}
           <div className="p-4 bg-white/[0.01] border border-white/[0.04] rounded-xl flex flex-col gap-3 shadow-md overflow-visible relative">
-            <h4 className="text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold block select-none">
+            <h4 className="text-sm font-mono uppercase tracking-wider text-neutral-300 font-semibold block select-none">
               轨道映射与绑定
             </h4>
             <div className="flex flex-col gap-2.5 bg-white/[0.005] p-3 rounded-lg border border-white/[0.03] overflow-visible relative">
               {/* Chinese binding */}
               <div className="flex flex-row items-center gap-2 overflow-visible">
-                <span className="w-24 text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold shrink-0 text-left">
+                <span className="w-24 text-sm font-mono uppercase tracking-wider text-neutral-300 font-semibold shrink-0 text-left">
                   主字幕轨
                 </span>
                 <TrackSelect
@@ -266,7 +266,7 @@ export const TaskList: React.FC = () => {
                 <>
                   {/* English binding */}
                   <div className="flex flex-row items-center gap-2 overflow-visible">
-                    <span className="w-24 text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold shrink-0 text-left">
+                    <span className="w-24 text-sm font-mono uppercase tracking-wider text-neutral-300 font-semibold shrink-0 text-left">
                       次字幕轨
                     </span>
                     <TrackSelect
@@ -280,7 +280,7 @@ export const TaskList: React.FC = () => {
 
                   {/* Commentary binding */}
                   <div className="flex flex-row items-center gap-2 overflow-visible">
-                    <span className="w-24 text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold shrink-0 text-left">
+                    <span className="w-24 text-sm font-mono uppercase tracking-wider text-neutral-300 font-semibold shrink-0 text-left">
                       旁白与导评
                     </span>
                     <TrackSelect
@@ -341,7 +341,7 @@ export const TaskList: React.FC = () => {
               
               {/* Output name */}
               <div className="flex-1 flex flex-col gap-1.5">
-                <label className="text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold select-none">
+                <label className="text-sm font-mono uppercase tracking-wider text-neutral-300 font-semibold select-none">
                   输出文件名
                 </label>
                 <input 
@@ -356,12 +356,12 @@ export const TaskList: React.FC = () => {
               {/* Alignment Mode Selection */}
               {!activeTask.isBilingualSingle && (
                 <div className="flex flex-col gap-1.5 w-full lg:w-60 shrink-0">
-                  <label className="text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold select-none">
+                  <label className="text-sm font-mono uppercase tracking-wider text-neutral-300 font-semibold select-none">
                     时间轴对齐算法
                   </label>
                   <div className="grid grid-cols-2 gap-0.5 p-0.5 rounded-lg bg-[#020204] border border-white/[0.06] relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.85)] h-10 items-center">
                     <button
-                      className={`relative z-10 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider transition-all duration-105 cursor-pointer ${alignmentMode === 'standard' ? 'text-white font-bold' : 'text-neutral-500 hover:text-neutral-350'}`}
+                      className={`relative z-10 py-1.5 rounded-md text-sm font-mono uppercase tracking-wider transition-all duration-105 cursor-pointer ${alignmentMode === 'standard' ? 'text-white font-bold' : 'text-neutral-500 hover:text-neutral-350'}`}
                       onClick={() => setAlignmentMode('standard')}
                     >
                       {alignmentMode === 'standard' && (
@@ -374,7 +374,7 @@ export const TaskList: React.FC = () => {
                       智能对齐
                     </button>
                     <button
-                      className={`relative z-10 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider transition-all duration-105 cursor-pointer ${alignmentMode === 'industrial' ? 'text-violet-400 font-bold' : 'text-neutral-500 hover:text-neutral-350'}`}
+                      className={`relative z-10 py-1.5 rounded-md text-sm font-mono uppercase tracking-wider transition-all duration-105 cursor-pointer ${alignmentMode === 'industrial' ? 'text-violet-400 font-bold' : 'text-neutral-500 hover:text-neutral-350'}`}
                       onClick={() => setAlignmentMode('industrial')}
                     >
                       {alignmentMode === 'industrial' && (
