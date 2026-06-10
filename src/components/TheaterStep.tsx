@@ -131,7 +131,7 @@ export const TheaterStep: React.FC = () => {
         <div className={`flex-1 flex flex-col min-w-0 relative pb-2 transition-all duration-300 ${isSettingsOpen ? 'lg:pr-[364px]' : 'pr-0'}`}>
           
           {/* Main simulator screen wrapped in defensive ErrorBoundary */}
-          <div className="flex-1 min-h-0 bg-[#050507] z-10 relative">
+          <div className="flex-1 min-h-0 bg-[#050507] z-10 relative min-h-[380px] lg:min-h-[440px]">
             <SimulatorBoundary>
               <ScreenSimulator 
                 subtitle={subtitleSlot}

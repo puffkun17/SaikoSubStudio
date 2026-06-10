@@ -501,7 +501,7 @@ export const DragZone: React.FC = () => {
           {/* Unified live scan log - now part of the central holographic experience */}
           <div className="w-full">
             <div className="text-[9px] font-mono tracking-[1.5px] text-emerald-400/60 mb-1 text-left pl-1">LIVE SCAN LOG</div>
-            <div className="h-20 overflow-hidden border border-white/10 bg-black/60 rounded-xl p-2.5 text-xs font-mono text-emerald-400/90 flex flex-col justify-end gap-y-px shadow-inner">
+            <div className="h-28 overflow-y-auto border border-white/10 bg-black/60 rounded-xl p-2.5 text-xs font-mono text-emerald-400/90 flex flex-col gap-y-px shadow-inner">
               <AnimatePresence>
                 {scanningLogs.map((log, idx) => (
                   <motion.div 

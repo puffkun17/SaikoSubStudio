@@ -254,7 +254,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
             style={{ backgroundColor: 'transparent' }}
           >
             <div 
-              className="relative overflow-hidden"
+              className="relative overflow-hidden border border-white/30"
               style={{ 
                 aspectRatio: innerAspect, 
                 width: '100%', 
