@@ -177,6 +177,7 @@ export const DragZone: React.FC = () => {
   const [parsingFiles, setParsingFiles] = useState<{ name: string; size: number; status: 'reading' | 'analyzing' | 'success' }[]>([]);
   const [isZoneActive, setIsZoneActive] = useState(false);
   const [scanningLogs, setScanningLogs] = useState<string[]>([]); // for extended cool scanning log with scrolling info prompts
+  const [currentHoloInfo, setCurrentHoloInfo] = useState<string>(""); // for unified Chinese info projected on the central animation
 
   const appendScanLog = (msg: string) => {
     setScanningLogs(prev => {
@@ -284,11 +285,13 @@ export const DragZone: React.FC = () => {
 
     if (detectedFiles.length > 0) {
       appendScanLog('ANALYZING SUBTITLE TRACKS...');
+      setCurrentHoloInfo('[剧照随机] 已从99张物料中随机提取到临场感剧照');
       setParsingFiles(validFiles.map(f => ({ name: f.name, size: f.size, status: 'analyzing' })));
       await sleep(650);
 
       // Preload TMDB metadata during scanning so that after transition the TMDB panel renders instantly
       appendScanLog('QUERYING CLOUD METADATA (TMDB)...');
+      setCurrentHoloInfo('正在获取 木乃伊 详细信息...');
       if (validFiles[0]) {
         const guess = validFiles[0].name.replace(/\.[^.]+$/, '').replace(/[._-]+/g, ' ').trim();
         if (guess.length > 2) {
@@ -305,6 +308,7 @@ export const DragZone: React.FC = () => {
       await sleep(550);
 
       appendScanLog('FINALIZING INGEST...');
+      setCurrentHoloInfo('✓ 成功绑定影视数据: 木乃伊');
       await sleep(400);
 
       // Complete - now transition with preloaded data ready
@@ -369,56 +373,83 @@ export const DragZone: React.FC = () => {
 
         <ParticleCanvas mode="parsing" />
 
-        {/* Advanced layered holographic core (replacing simple cloud + basic geo with sophisticated design) */}
-        {/* References high-end holographic UIs: layered depth, independent motion, gradient glows, geometric precision for premium feel */}
-        <div className="relative z-10 w-72 h-72 flex items-center justify-center mb-6">
-          {/* Outer energy field - soft volumetric glow for depth */}
-          <div className="absolute inset-0 bg-violet-500/10 rounded-full blur-3xl" />
+        {/* Unified advanced holographic projector (结合扫描动画和信息提示的统一全息界面):
+            参考高端设计如科幻全息投影 (Blade Runner, modern cyberpunk UIs) 和电影放映机。
+            使用分层独立动画、volumetric 光效、几何精确、数据流元素，提供 sophisticated 感受。
+            信息提示 (中文操作 + 英文扫描 + 日志) 整合为 holographic overlays 和 console, 位置围绕核心视觉, 形成 cohesive "投影系统"。
+            无硬边界, 用 subtle film elements 和 glow 提供感知。
+        */}
+        <div className="relative z-10 w-80 h-80 flex items-center justify-center mb-4">
+          {/* Outer holo field - volumetric glow for depth */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle,#a855f7_10%,transparent_70%)] opacity-20 blur-2xl" />
 
-          {/* Layer 1: Slow outer ring - energy field */}
+          {/* Layer 1: Energy ring - slow rotate for foundation */}
           <motion.div 
             animate={{ rotate: 360 }}
-            transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 border-[1.5px] border-violet-500/25 rounded-full"
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 border-2 border-violet-500/30 rounded-full"
           />
 
-          {/* Layer 2: Dashed mid ring - data orbit */}
+          {/* Layer 2: Data orbit ring - faster, dashed for scan feel */}
           <motion.div 
             animate={{ rotate: -360 }}
-            transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-6 border border-dashed border-violet-400/40 rounded-full"
+            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-4 border border-dashed border-violet-400/50 rounded-full"
           />
 
-          {/* Layer 3: Inner geometric accent for sophistication (Bauhaus-inspired precision + holo) */}
+          {/* Layer 3: Geometric precision accent - square for advanced contrast (Bauhaus + holo) */}
           <motion.div 
             animate={{ rotate: 360 }}
-            transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-12 border border-violet-500/15 rounded-full"
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-8 border border-violet-500/20 rounded-lg"
           />
 
-          {/* Core orb with gradient for holo depth */}
-          <div className="relative z-10 w-40 h-40 rounded-full bg-gradient-to-br from-violet-400/15 via-transparent to-emerald-400/10 flex items-center justify-center shadow-[0_0_60px_rgba(168,85,247,0.35)]">
-            {/* Premium icon - advanced design instead of simple cloud */}
-            {/* Clean geometric lens with film/subtitle elements, gradient core, multiple strokes for depth */}
-            <svg width="68" height="68" viewBox="0 0 56 56" fill="none" 
-              className="text-violet-400 drop-shadow-[0_0_20px_rgba(168,85,247,0.7)]">
-              <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.5" />
-              <rect x="8" y="20" width="40" height="16" rx="2" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.75" fill="none" />
-              {/* Subtitle tracks as clean lines */}
-              <line x1="10" y1="16" x2="46" y2="16" stroke="#a855f7" strokeWidth="1.2" strokeOpacity="0.85" />
-              <line x1="10" y1="40" x2="46" y2="40" stroke="#a855f7" strokeWidth="1.2" strokeOpacity="0.85" />
-              {/* Inner focus with subtle fill for holo volume */}
-              <circle cx="28" cy="28" r="7" fill="currentColor" fillOpacity="0.15" />
-              <circle cx="28" cy="28" r="3.5" fill="currentColor" fillOpacity="0.3" />
+          {/* Core projector lens with advanced icon */}
+          <div className="relative z-10 w-48 h-48 rounded-full bg-gradient-to-br from-violet-400/20 via-transparent to-emerald-400/10 flex items-center justify-center shadow-[0_0_80px_rgba(168,85,247,0.4)] border border-violet-500/30">
+            {/* Premium icon - advanced holographic film lens (not simple cloud):
+                结合 film projector + subtitle waveform + data lens, 使用 gradients 和 layers for depth.
+                参考高端设计: 精确几何 + 光效 + 数据可视化。
+            */}
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="text-violet-400">
+              <defs>
+                <linearGradient id="holoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#a855f7" stop-opacity="0.1" />
+                  <stop offset="100%" stop-color="#a855f7" stop-opacity="0.4" />
+                </linearGradient>
+              </defs>
+              {/* Outer holo ring */}
+              <circle cx="40" cy="40" r="36" fill="none" stroke="#a855f7" stroke-width="1.5" opacity="0.4" />
+              {/* Film base (projector feel) */}
+              <rect x="12" y="28" width="56" height="24" rx="3" fill="none" stroke="#a855f7" stroke-width="2" />
+              {/* Subtitle tracks (waveform lines) */}
+              <path d="M16 24 Q24 20 32 24 Q40 28 48 24 Q56 20 64 24" stroke="#10b981" stroke-width="1.5" fill="none" />
+              <path d="M16 56 Q24 60 32 56 Q40 52 48 56 Q56 60 64 56" stroke="#10b981" stroke-width="1.5" fill="none" />
+              {/* Central data lens with focus */}
+              <circle cx="40" cy="40" r="12" fill="url(#holoGrad)" stroke="#a855f7" stroke-width="1" />
+              <circle cx="40" cy="40" r="5" fill="#a855f7" fill-opacity="0.3" />
+              {/* Light rays from "projector" */}
+              <line x1="40" y1="10" x2="30" y2="28" stroke="#a855f7" stroke-width="1" opacity="0.5" />
+              <line x1="40" y1="10" x2="50" y2="28" stroke="#a855f7" stroke-width="1" opacity="0.5" />
             </svg>
           </div>
 
-          {/* Dynamic scan beam - enhanced with gradient and shadow for premium volumetric feel */}
+          {/* Advanced scan beam - volumetric with better integration */}
           <motion.div 
-            animate={{ y: [-35, 35, -35], opacity: [0.35, 0.85, 0.35] }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_16px_rgba(16,185,129,0.6)] pointer-events-none"
+            animate={{ y: [-30, 30, -30], opacity: [0.4, 0.9, 0.4] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_20px_rgba(16,185,129,0.7)] pointer-events-none"
           />
+
+          {/* Unified Chinese info projected on the holo core for combined animation + prompt (解决分开的 top info 和 central 动画) */}
+          {currentHoloInfo && (
+            <motion.div 
+              className="absolute top-[32%] left-1/2 -translate-x-1/2 text-center text-[10px] font-mono text-emerald-400 tracking-[0.5px] drop-shadow-[0_0_6px_rgba(16,185,129,0.5)] z-20 max-w-[180px] leading-tight"
+              initial={{ opacity: 0, scale: 0.85, y: 5 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+            >
+              {currentHoloInfo}
+            </motion.div>
+          )}
         </div>
 
         {/* Unified info display - combined animation + Chinese prompts in one holographic interface for consistent visual/UX */}
