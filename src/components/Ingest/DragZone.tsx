@@ -167,7 +167,7 @@ const ParticleCanvas: React.FC<{ mode: 'idle' | 'hover' | 'dragging' | 'parsing'
 };
 
 export const DragZone: React.FC = () => {
-  const { isDragging, setIsDragging, processFiles, addLog } = useStudioStore();
+  const { isDragging, setIsDragging, processFiles, addLog, searchTmdb } = useStudioStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const dragCounterRef = useRef(0);
@@ -292,7 +292,7 @@ export const DragZone: React.FC = () => {
       if (validFiles[0]) {
         const guess = validFiles[0].name.replace(/\.[^.]+$/, '').replace(/[._-]+/g, ' ').trim();
         if (guess.length > 2) {
-          get().searchTmdb(guess); // background preload for instant render in next view
+          searchTmdb(guess);
         }
       }
       await sleep(900);
