@@ -464,116 +464,108 @@ export const DragZone: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Complete redesign - Gaseous Holographic Lens, no outer box cards */}
+      {/* Borderless cinematic screen area（无边界但可感知的字幕放映区域）:
+          Large open "projection frame" without hard circular border.
+          Left/right film-strip perforations give clear perception of the drop zone.
+          Very subtle inner lighting and top highlight make the screen feel "lit" and special
+          without boxing the content. Perfect for subtitle/film theme.
+      */}
+      {/* Left film perforation strip（左侧胶片齿孔） - perceptible reel edge */}
+      <div className="absolute left-0 top-0 bottom-0 w-5 z-30 pointer-events-none flex flex-col justify-around py-3">
+        {Array.from({ length: 11 }).map((_, i) => (
+          <div key={i} className="mx-auto w-2.5 h-[5px] bg-black/80 rounded-[1px]" />
+        ))}
+      </div>
+
+      {/* Right film perforation strip */}
+      <div className="absolute right-0 top-0 bottom-0 w-5 z-30 pointer-events-none flex flex-col justify-around py-3">
+        {Array.from({ length: 11 }).map((_, i) => (
+          <div key={i} className="mx-auto w-2.5 h-[5px] bg-black/80 rounded-[1px]" />
+        ))}
+      </div>
+
+      {/* Main borderless screen - the perceptible drop target */}
       <motion.div 
         onClick={() => fileInputRef.current?.click()}
         animate={isDragging 
-          ? { scale: 0.985 } 
+          ? { scale: 0.985, boxShadow: 'inset 0 0 90px rgba(0,0,0,0.95)' } 
           : isZoneActive
-            ? { scale: 1.01 }
-            : { scale: 1 }
+            ? { scale: 1.008, boxShadow: 'inset 0 0 70px rgba(0,0,0,0.85), 0 0 60px rgba(168,85,247,0.08)' }
+            : { scale: 1, boxShadow: 'inset 0 0 80px rgba(0,0,0,0.9)' }
         }
-        transition={{ type: "spring", stiffness: 350, damping: 28 }}
-        className="relative w-80 h-80 rounded-full flex flex-col items-center justify-center cursor-pointer transition-all duration-300 select-none z-10"
+        transition={{ type: "spring", stiffness: 320, damping: 26 }}
+        className="relative w-full max-w-[920px] h-[310px] mx-auto bg-[#020203] flex flex-col items-center justify-center cursor-pointer overflow-hidden select-none z-10"
       >
         <ParticleCanvas mode={isDragging ? 'dragging' : (isZoneActive ? 'hover' : 'idle')} />
-        {/* Subtle color wash toned down for Windows Chrome color cast issues */}
-        <div className="absolute inset-[-20px] bg-gradient-to-tr from-violet-600/[0.004] via-fuchsia-600/[0.002] to-transparent rounded-full filter blur-3xl opacity-25 group-hover/outer:opacity-50 transition-opacity duration-500 -z-20" />
 
-        {/* Borderless cinematic screen area（无边界但可感知的字幕放映区域）:
-            Large open "projection frame" without hard circular border.
-            Left/right film-strip perforations give clear perception of the drop zone.
-            Very subtle inner lighting and top highlight make the screen feel "lit" and special
-            without boxing the content. Perfect for subtitle/film theme.
+        {/* Very subtle screen highlight for user perception without hard border */}
+        <div className="absolute inset-x-8 top-5 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+        <div className="absolute inset-x-8 bottom-5 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+
+        {/* 
+          Custom cinematic Ingest Lens icon (no generic AI cloud)
+          - aperture（光圈）: 多叶片结构，模拟真实相机/投影机镜头，增加电影感。
+          - dual-track waveform（双轨波形）: 两条波浪线代表双语字幕（中英轨），这是本工具的核心身份。
+          这个 SVG 比 <UploadCloud> 更有领域特征（domain-specific），避免 AI 模板感。
         */}
-        {/* Left film perforation strip（左侧胶片齿孔） - perceptible reel edge */}
-        <div className="absolute left-0 top-0 bottom-0 w-5 z-30 pointer-events-none flex flex-col justify-around py-3">
-          {Array.from({ length: 11 }).map((_, i) => (
-            <div key={i} className="mx-auto w-2.5 h-[5px] bg-black/80 rounded-[1px]" />
-          ))}
-        </div>
-
-        {/* Right film perforation strip */}
-        <div className="absolute right-0 top-0 bottom-0 w-5 z-30 pointer-events-none flex flex-col justify-around py-3">
-          {Array.from({ length: 11 }).map((_, i) => (
-            <div key={i} className="mx-auto w-2.5 h-[5px] bg-black/80 rounded-[1px]" />
-          ))}
-        </div>
-
-        {/* Main borderless screen - the perceptible drop target */}
-        <motion.div 
-          onClick={() => fileInputRef.current?.click()}
-          animate={isDragging 
-            ? { scale: 0.985, boxShadow: 'inset 0 0 90px rgba(0,0,0,0.95)' } 
-            : isZoneActive
-              ? { scale: 1.008, boxShadow: 'inset 0 0 70px rgba(0,0,0,0.85), 0 0 60px rgba(168,85,247,0.08)' }
-              : { scale: 1, boxShadow: 'inset 0 0 80px rgba(0,0,0,0.9)' }
-          }
-          transition={{ type: "spring", stiffness: 320, damping: 26 }}
-          className="relative w-full max-w-[920px] h-[310px] mx-auto bg-[#020203] flex flex-col items-center justify-center cursor-pointer overflow-hidden select-none z-10"
-        >
-          <ParticleCanvas mode={isDragging ? 'dragging' : (isZoneActive ? 'hover' : 'idle')} />
-
-          {/* Very subtle screen highlight for user perception without hard border */}
-          <div className="absolute inset-x-8 top-5 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-          <div className="absolute inset-x-8 bottom-5 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-
-          {/* 
-            Custom cinematic Ingest Lens icon (no generic AI cloud)
-            - aperture（光圈）: 多叶片结构，模拟真实相机/投影机镜头，增加电影感。
-            - dual-track waveform（双轨波形）: 两条波浪线代表双语字幕（中英轨），这是本工具的核心身份。
-            这个 SVG 比 <UploadCloud> 更有领域特征（domain-specific），避免 AI 模板感。
-          */}
-          {isDragging ? (
-            <div className="flex flex-col items-center gap-2 z-20">
-              <motion.div
-                animate={{ y: [-2, 2, -2] }}
-                transition={{ repeat: Infinity, duration: 1.1, ease: "easeInOut" }}
-              >
-                <svg width="48" height="48" viewBox="0 0 52 52" fill="none" className="drop-shadow-[0_0_12px_rgba(16,185,129,0.65)]">
-                  <circle cx="26" cy="26" r="23" stroke="#10b981" strokeWidth="1.5" strokeOpacity="0.6"/>
-                  <g stroke="#10b981" strokeWidth="1.25" strokeOpacity="0.9">
-                    <path d="M26 9 L26 17" /><path d="M26 35 L26 43" />
-                    <path d="M9 26 L17 26" /><path d="M35 26 L43 26" />
-                    <path d="M13.5 13.5 L19 19" /><path d="M33 33 L38.5 38.5" />
-                    <path d="M38.5 13.5 L33 19" /><path d="M19 33 L13.5 38.5" />
-                  </g>
-                  <path d="M18 26 Q21 22 24 26 Q27 30 30 26" stroke="#34d399" strokeWidth="1.1" fill="none" strokeOpacity="0.85"/>
-                  <path d="M18 29 Q21 25 24 29 Q27 33 30 29" stroke="#34d399" strokeWidth="0.9" fill="none" strokeOpacity="0.6"/>
-                </svg>
-              </motion.div>
-              <span className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-400 font-bold">RELEASE TO INGEST</span>
+        {isDragging ? (
+          <div className="flex flex-col items-center gap-2 z-20">
+            <motion.div
+              animate={{ y: [-2, 2, -2] }}
+              transition={{ repeat: Infinity, duration: 1.1, ease: "easeInOut" }}
+            >
+              <svg width="48" height="48" viewBox="0 0 52 52" fill="none" className="drop-shadow-[0_0_12px_rgba(16,185,129,0.65)]">
+                <circle cx="26" cy="26" r="23" stroke="#10b981" strokeWidth="1.5" strokeOpacity="0.6"/>
+                <g stroke="#10b981" strokeWidth="1.25" strokeOpacity="0.9">
+                  <path d="M26 9 L26 17" />
+                  <path d="M26 35 L26 43" />
+                  <path d="M9 26 L17 26" />
+                  <path d="M35 26 L43 26" />
+                  <path d="M13.5 13.5 L19 19" />
+                  <path d="M33 33 L38.5 38.5" />
+                  <path d="M38.5 13.5 L33 19" />
+                  <path d="M19 33 L13.5 38.5" />
+                </g>
+                <path d="M18 26 Q21 22 24 26 Q27 30 30 26" stroke="#34d399" strokeWidth="1.1" fill="none" strokeOpacity="0.85"/>
+                <path d="M18 29 Q21 25 24 29 Q27 33 30 29" stroke="#34d399" strokeWidth="0.9" fill="none" strokeOpacity="0.6"/>
+              </svg>
+            </motion.div>
+            <span className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-400 font-bold">RELEASE TO INGEST</span>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-3 z-20 text-center">
+            <div className="relative">
+              <svg width="62" height="62" viewBox="0 0 56 56" fill="none" 
+                className={`transition-all duration-300 ${isZoneActive ? 'text-violet-400 drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]' : 'text-neutral-400/70'}`}>
+                <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.25" strokeOpacity="0.55" />
+                <g stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.75">
+                  <path d="M28 5.5 L28 13" />
+                  <path d="M28 43 L28 50.5" />
+                  <path d="M5.5 28 L13 28" />
+                  <path d="M43 28 L50.5 28" />
+                  <path d="M10 10 L16.5 16.5" />
+                  <path d="M39.5 39.5 L46 46" />
+                  <path d="M46 10 L39.5 16.5" />
+                  <path d="M16.5 39.5 L10 46" />
+                </g>
+                <path d="M19 28 Q23 24 27 28 Q31 32 35 28" stroke="currentColor" strokeWidth="1.6" strokeOpacity="0.9" fill="none"/>
+                <path d="M19 31.5 Q23 27.5 27 31.5 Q31 35.5 35 31.5" stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.55" fill="none"/>
+              </svg>
             </div>
-          ) : (
-            <div className="flex flex-col items-center gap-3 z-20 text-center">
-              <div className="relative">
-                <svg width="62" height="62" viewBox="0 0 56 56" fill="none" 
-                  className={`transition-all duration-300 ${isZoneActive ? 'text-violet-400 drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]' : 'text-neutral-400/70'}`}>
-                  <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.25" strokeOpacity="0.55" />
-                  <g stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.75">
-                    <path d="M28 5.5 L28 13" /><path d="M28 43 L28 50.5" />
-                    <path d="M5.5 28 L13 28" /><path d="M43 28 L50.5 28" />
-                    <path d="M10 10 L16.5 16.5" /><path d="M39.5 39.5 L46 46" />
-                    <path d="M46 10 L39.5 16.5" /><path d="M16.5 39.5 L10 46" />
-                  </g>
-                  <path d="M19 28 Q23 24 27 28 Q31 32 35 28" stroke="currentColor" strokeWidth="1.6" strokeOpacity="0.9" fill="none"/>
-                  <path d="M19 31.5 Q23 27.5 27 31.5 Q31 35.5 35 31.5" stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.55" fill="none"/>
-                </svg>
-              </div>
 
-              <div>
-                <div className="text-[15px] font-mono font-bold tracking-[3.2px] text-white/95">SUBTITLE FRAME</div>
-                <div className="text-[10px] text-neutral-500 tracking-[1px] mt-0.5">DROP FILES TO PROJECT INTO REEL</div>
-              </div>
-
-              <div className="flex gap-3 text-[9px] font-mono tracking-[1.5px] text-neutral-600 mt-1">
-                <span>SRT</span><span className="text-white/15">•</span><span>ASS</span><span className="text-white/15">•</span><span>ZIP</span>
-              </div>
+            <div>
+              <div className="text-[15px] font-mono font-bold tracking-[3.2px] text-white/95">SUBTITLE FRAME</div>
+              <div className="text-[10px] text-neutral-500 tracking-[1px] mt-0.5">DROP FILES TO PROJECT INTO REEL</div>
             </div>
-          )}
-        </motion.div>
 
-        {/* Refined action buttons — stronger cinematic glass, better hierarchy and breathing */}
+            <div className="flex gap-3 text-[9px] font-mono tracking-[1.5px] text-neutral-600 mt-1">
+              <span>SRT</span><span className="text-white/15">•</span><span>ASS</span><span className="text-white/15">•</span><span>ZIP</span>
+            </div>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Refined action buttons — stronger cinematic glass, better hierarchy and breathing */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center mt-9 w-full sm:w-auto px-4 z-20">
         <button 
           onClick={() => fileInputRef.current?.click()}
