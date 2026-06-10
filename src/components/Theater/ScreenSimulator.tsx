@@ -227,137 +227,85 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
         <div className="absolute bottom-[20%] right-[20%] w-[45%] h-[45%] rounded-full bg-aurora-glow-emerald" />
       </div>
 
-      {/* Cinematic presentation: clean scope screen for 2.39:1 / 1.9:1, TV mask only for 4:3/16:9 */}
-      {isScope ? (
-        /* Pure cinematic scope presentation — the backdrop (剧照) is the star, not a TV bezel */
-        <div className="relative flex justify-center items-center z-10" style={{ width: '100%', maxWidth: '1080px' }}>
-          {/* Dark theater stage */}
-          <div className="relative w-full" style={{ aspectRatio: innerAspect }}>
-            {/* The actual projected still / backdrop fills the exact scope frame */}
+      {/* Always use the TV frame mask (遮罩) to simulate playback on a TV.
+          The selected theaterAspect (e.g. 2.39:1) creates the letterboxed video window inside the TV.
+          This lets you check subtitle position and appearance inside the 2.39:1 active picture area on a TV. */}
+      <div 
+        className="relative flex justify-center items-center fade-in-up border border-white/[0.06] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.5)] z-10"
+        style={{ aspectRatio: maskAspect, maxWidth: '100%', maxHeight: '100%', height: '100%' }}
+      >
+        <img src={maskImg} className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20 drop-shadow-2xl" alt="TV Frame" />
+
+        {/* The TV's physical glass / display area (black bars will appear around the inner aspect window) */}
+        <div 
+          className="absolute overflow-hidden z-10"
+          style={{
+            left: screenPos.left,
+            top: screenPos.top,
+            width: screenPos.width,
+            height: screenPos.height,
+            backgroundColor: '#000'
+          }}
+        >
+          {/* Inner video window — exact chosen aspect (2.39:1 etc.), filled with the 剧照 as the "video" content.
+              Black letterbox bars are created by the centering + aspect constraint against the TV glass. */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ backgroundColor: 'transparent' }}
+          >
             <div 
-              className="absolute inset-0 overflow-hidden rounded-sm shadow-[0_0_120px_rgba(0,0,0,0.9)]"
-              style={{
-                backgroundColor: '#050507',
+              className="relative overflow-hidden"
+              style={{ 
+                aspectRatio: innerAspect, 
+                width: '100%', 
+                maxWidth: '100%', 
+                maxHeight: '100%',
+                backgroundColor: '#000',
                 ...getBackdropStyle()
               }}
             >
-              {/* Subtle filmic vignette + projector softness for depth and readability */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(0,0,0,0)_35%,rgba(0,0,0,0.55)_72%,rgba(0,0,0,0.82)_100%)]" />
-              {/* Very light film grain for texture (projected print feel) */}
-              <div className="absolute inset-0 opacity-[0.035] mix-blend-screen" 
-                   style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'140\' height=\'140\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'2\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")' }} />
+              {/* States inside the active video area */}
+              {subtitle.status === 'idle' && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 select-none">
+                  <span className="text-white/20 text-xs font-mono tracking-widest uppercase">[ Empty Canvas ]</span>
+                </div>
+              )}
+              {subtitle.status === 'loading' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/60 backdrop-blur-xs">
+                  <div className="w-6 h-6 border-2 border-accent-neon border-t-transparent rounded-full animate-spin mb-3" />
+                  <span className="text-white/40 text-xs font-mono tracking-widest uppercase">{subtitle.progress ? `Loading ${Math.round(subtitle.progress * 100)}%` : 'Loading Subtitles...'}</span>
+                </div>
+              )}
+              {subtitle.status === 'error' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/85">
+                  <span className="text-rose-500/80 text-xs font-mono tracking-widest uppercase mb-1">[ Data Error ]</span>
+                  <span className="text-white/40 text-[0.625rem] font-mono tracking-wide px-4 text-center max-w-xs break-words">{subtitle.message}</span>
+                </div>
+              )}
+
+              {/* Subtitle layers — constrained to the 2.39:1 (or chosen) video window */}
+              {topElement && (
+                <div className="absolute left-[5%] right-[5%] flex flex-col items-center justify-start text-center pointer-events-none select-none z-40 transition-all duration-200" style={{ top: `${paddingBottomCqh * 0.8}cqh` }}>
+                  {topElement}
+                </div>
+              )}
+              {bottomElement && (
+                <div className="absolute left-[5%] right-[5%] flex flex-col items-center justify-end text-center pointer-events-none select-none z-40 transition-all duration-200" style={{ bottom: `${paddingBottomCqh}cqh` }}>
+                  {bottomElement}
+                </div>
+              )}
+
+              {/* Alignment guides inside the video area */}
+              <div className="absolute left-0 right-0 z-40 transition-all duration-300 pointer-events-none flex items-center" style={{ bottom: `${paddingBottomCqh}cqh`, opacity: (guides.show || guides.temp) ? 1 : 0, borderBottom: `1px dashed ${isMagnetic ? '#10b981' : 'rgba(168,85,247,0.45)'}`, boxShadow: isMagnetic ? '0 0 10px #10b981, 0 0 4px #10b981' : 'none', transform: 'scaleY(0.5)', transformOrigin: 'bottom' }}>
+                {isMagnetic && <div className="absolute right-4 -top-3.5 text-[0.5625rem] text-[#10b981]/90 font-mono tracking-[0.2em] uppercase bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(16,185,129,0.5)] scale-y-200">MAGNETIC ALIGNED</div>}
+              </div>
+              {targetCqh > 0 && (
+                <div className="absolute left-0 right-0 z-30 transition-all duration-300 pointer-events-none" style={{ bottom: `${targetCqh}cqh`, opacity: (guides.show || guides.temp) && !isMagnetic ? 1 : 0, borderBottom: '1px solid rgba(255,255,255,0.08)', transform: 'scaleY(0.5)', transformOrigin: 'bottom' }} />
+              )}
             </div>
-
-            {/* Subtitles and overlays live on top of the beautiful still */}
-            {/* Idle / loading / error states */}
-            {subtitle.status === 'idle' && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 select-none">
-                <span className="text-white/25 text-xs font-mono tracking-[3px] uppercase">投射画框 • 2.39:1</span>
-              </div>
-            )}
-            {subtitle.status === 'loading' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/50">
-                <div className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full animate-spin mb-3" />
-                <span className="text-white/50 text-xs font-mono tracking-widest uppercase">Loading subtitles...</span>
-              </div>
-            )}
-            {subtitle.status === 'error' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/80">
-                <span className="text-rose-400/80 text-xs font-mono tracking-widest uppercase mb-1">[ Data Error ]</span>
-                <span className="text-white/40 text-[0.625rem] font-mono px-4 text-center max-w-xs">{subtitle.message}</span>
-              </div>
-            )}
-
-            {/* Subtitle layers — strong shadows for any backdrop */}
-            {topElement && (
-              <div className="absolute left-[6%] right-[6%] flex flex-col items-center justify-start text-center pointer-events-none select-none z-40" style={{ top: `${paddingBottomCqh * 0.7}cqh` }}>
-                {topElement}
-              </div>
-            )}
-            {bottomElement && (
-              <div className="absolute left-[6%] right-[6%] flex flex-col items-center justify-end text-center pointer-events-none select-none z-40" style={{ bottom: `${paddingBottomCqh}cqh` }}>
-                {bottomElement}
-              </div>
-            )}
-
-            {/* Perceptible cinema screen frame (遮罩边界) — clean scope edge so the projected 剧照 has clear presence without a TV bezel */}
-            <div className="absolute inset-0 rounded-sm border border-white/[0.07] pointer-events-none z-20" />
-            <div className="absolute inset-0 rounded-sm" 
-                 style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.025), inset 0 0 70px rgba(0,0,0,0.65), 0 0 90px rgba(168,85,247,0.07)' }} />
-            
-            {/* Subtle scope edge glow / projector spill */}
-            <div className="absolute -inset-[1px] rounded-sm pointer-events-none z-10" 
-                 style={{ boxShadow: '0 0 80px rgba(168,85,247,0.06)' }} />
           </div>
         </div>
-      ) : (
-        /* Legacy TV / 16:9 framed treatment (kept for 4:3 and standard HD) */
-        <div 
-          className="relative flex justify-center items-center fade-in-up border border-white/[0.06] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.5)] z-10"
-          style={{ aspectRatio: maskAspect, maxWidth: '100%', maxHeight: '100%', height: '100%' }}
-        >
-          <img src={maskImg} className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20 drop-shadow-2xl" alt="Frame" />
-
-          <div 
-            className="absolute overflow-hidden z-10"
-            style={{
-              left: screenPos.left, top: screenPos.top, width: screenPos.width, height: screenPos.height,
-              backgroundColor: '#000',
-              ...getBackdropStyle()
-            }}
-          >
-            {/* Inner aspect container — light overlay instead of solid dark that hid backdrops */}
-            <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-              <div 
-                className="relative overflow-hidden"
-                style={{ 
-                  aspectRatio: innerAspect, 
-                  width: '100%', 
-                  maxWidth: '100%', 
-                  maxHeight: '100%',
-                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%)'
-                }}
-              />
-            </div>
-
-            {subtitle.status === 'idle' && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 select-none">
-                <span className="text-white/20 text-xs font-mono tracking-widest uppercase">[ Empty Canvas ]</span>
-              </div>
-            )}
-            {subtitle.status === 'loading' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/60 backdrop-blur-xs">
-                <div className="w-6 h-6 border-2 border-accent-neon border-t-transparent rounded-full animate-spin mb-3" />
-                <span className="text-white/40 text-xs font-mono tracking-widest uppercase">{subtitle.progress ? `Loading ${Math.round(subtitle.progress * 100)}%` : 'Loading Subtitles...'}</span>
-              </div>
-            )}
-            {subtitle.status === 'error' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/85">
-                <span className="text-rose-500/80 text-xs font-mono tracking-widest uppercase mb-1">[ Data Error ]</span>
-                <span className="text-white/40 text-[0.625rem] font-mono tracking-wide px-4 text-center max-w-xs break-words">{subtitle.message}</span>
-              </div>
-            )}
-
-            {topElement && (
-              <div className="absolute left-[5%] right-[5%] flex flex-col items-center justify-start text-center pointer-events-none select-none z-40 transition-all duration-200" style={{ top: `${paddingBottomCqh * 0.8}cqh` }}>
-                {topElement}
-              </div>
-            )}
-            {bottomElement && (
-              <div className="absolute left-[5%] right-[5%] flex flex-col items-center justify-end text-center pointer-events-none select-none z-40 transition-all duration-200" style={{ bottom: `${paddingBottomCqh}cqh` }}>
-                {bottomElement}
-              </div>
-            )}
-
-            <div className="absolute left-0 right-0 z-40 transition-all duration-300 pointer-events-none flex items-center" style={{ bottom: `${paddingBottomCqh}cqh`, opacity: (guides.show || guides.temp) ? 1 : 0, borderBottom: `1px dashed ${isMagnetic ? '#10b981' : 'rgba(168,85,247,0.45)'}`, boxShadow: isMagnetic ? '0 0 10px #10b981, 0 0 4px #10b981' : 'none', transform: 'scaleY(0.5)', transformOrigin: 'bottom' }}>
-              {isMagnetic && <div className="absolute right-4 -top-3.5 text-[0.5625rem] text-[#10b981]/90 font-mono tracking-[0.2em] uppercase bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(16,185,129,0.5)] scale-y-200">MAGNETIC ALIGNED</div>}
-            </div>
-            {targetCqh > 0 && (
-              <div className="absolute left-0 right-0 z-30 transition-all duration-300 pointer-events-none" style={{ bottom: `${targetCqh}cqh`, opacity: (guides.show || guides.temp) && !isMagnetic ? 1 : 0, borderBottom: '1px solid rgba(255,255,255,0.08)', transform: 'scaleY(0.5)', transformOrigin: 'bottom' }} />
-            )}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
