@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStudioStore } from '@/store/useStudioStore';
 import { ScreenSimulator } from '@/components/Theater/ScreenSimulator';
 import { SimulatorBoundary } from '@/components/Theater/SimulatorBoundary';

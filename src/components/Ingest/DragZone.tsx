@@ -289,27 +289,28 @@ export const DragZone: React.FC = () => {
       setParsingFiles(validFiles.map(f => ({ name: f.name, size: f.size, status: 'analyzing' })));
       await sleep(650);
 
-      // Preload TMDB metadata during scanning so that after transition the TMDB panel renders instantly
       appendScanLog('QUERYING CLOUD METADATA (TMDB)...');
-      setCurrentHoloInfo('正在获取 木乃伊 详细信息...');
+      let displayTitle = '影视数据';
       if (validFiles[0]) {
         const guess = validFiles[0].name.replace(/\.[^.]+$/, '').replace(/[._-]+/g, ' ').trim();
         if (guess.length > 2) {
-          searchTmdb(guess);
+          displayTitle = guess.length > 28 ? guess.slice(0, 26) + '…' : guess;
+          await searchTmdb(guess).catch(() => {});
         }
       }
-      await sleep(900);
+      setCurrentHoloInfo(`正在获取 ${displayTitle} 详细信息...`);
+      await sleep(650);
 
       appendScanLog('SYNCING DUAL-TRACK DATA...');
-      await sleep(700);
+      await sleep(550);
 
       appendScanLog('RENDERING CINEMATIC PREVIEW...');
       setParsingFiles(validFiles.map(f => ({ name: f.name, size: f.size, status: 'success' })));
-      await sleep(550);
+      await sleep(450);
 
       appendScanLog('FINALIZING INGEST...');
-      setCurrentHoloInfo('✓ 成功绑定影视数据: 木乃伊');
-      await sleep(400);
+      setCurrentHoloInfo(`✓ 成功绑定影视数据: ${displayTitle}`);
+      await sleep(300);
 
       // Complete - now transition with preloaded data ready
       setIsParsing(false);
