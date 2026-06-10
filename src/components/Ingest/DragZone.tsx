@@ -176,6 +176,16 @@ export const DragZone: React.FC = () => {
   const [isParsing, setIsParsing] = useState(false);
   const [parsingFiles, setParsingFiles] = useState<{ name: string; size: number; status: 'reading' | 'analyzing' | 'success' }[]>([]);
   const [isZoneActive, setIsZoneActive] = useState(false);
+  const [scanningLogs, setScanningLogs] = useState<string[]>([]); // for extended cool scanning log with scrolling info prompts
+
+  const appendScanLog = (msg: string) => {
+    setScanningLogs(prev => {
+      const next = [...prev, msg];
+      return next.length > 7 ? next.slice(-7) : next; // keep recent for scrolling effect
+    });
+  };
+
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const readAndDecodeFile = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -236,8 +246,16 @@ export const DragZone: React.FC = () => {
     // Show visual ingest scanning phase
     setIsParsing(true);
     setParsingFiles(validFiles.map(f => ({ name: f.name, size: f.size, status: 'reading' })));
+    setScanningLogs([]);
 
     const detectedFiles: any[] = [];
+
+    // Extended scanning phases to give backend API time and create cool UX with scrolling info
+    appendScanLog('INITIALIZING SUBTITLE PROJECTOR...');
+    await sleep(450);
+
+    appendScanLog('DETECTING FILE STRUCTURE...');
+    await sleep(550);
 
     for (const file of validFiles) {
       const nameLower = file.name.toLowerCase();
@@ -265,22 +283,37 @@ export const DragZone: React.FC = () => {
     }
 
     if (detectedFiles.length > 0) {
-      // 1. reading phase
-      await new Promise(resolve => setTimeout(resolve, 400));
-      
-      // 2. analyzing phase
+      appendScanLog('ANALYZING SUBTITLE TRACKS...');
       setParsingFiles(validFiles.map(f => ({ name: f.name, size: f.size, status: 'analyzing' })));
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // 3. success phase
+      await sleep(650);
+
+      // Preload TMDB metadata during scanning so that after transition the TMDB panel renders instantly
+      appendScanLog('QUERYING CLOUD METADATA (TMDB)...');
+      if (validFiles[0]) {
+        const guess = validFiles[0].name.replace(/\.[^.]+$/, '').replace(/[._-]+/g, ' ').trim();
+        if (guess.length > 2) {
+          get().searchTmdb(guess); // background preload for instant render in next view
+        }
+      }
+      await sleep(900);
+
+      appendScanLog('SYNCING DUAL-TRACK DATA...');
+      await sleep(700);
+
+      appendScanLog('RENDERING CINEMATIC PREVIEW...');
       setParsingFiles(validFiles.map(f => ({ name: f.name, size: f.size, status: 'success' })));
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Complete Ingestion
+      await sleep(550);
+
+      appendScanLog('FINALIZING INGEST...');
+      await sleep(400);
+
+      // Complete - now transition with preloaded data ready
       setIsParsing(false);
+      setScanningLogs([]);
       processFiles(detectedFiles);
     } else {
       setIsParsing(false);
+      setScanningLogs([]);
       addLog("未在选中的文件或文件夹中检测到任何有效字幕！", "error");
     }
   };
@@ -397,6 +430,25 @@ export const DragZone: React.FC = () => {
               </AnimatePresence>
             </div>
           </div>
+
+          {/* Extended cool scanning log with scrolling information prompts */}
+          <div className="w-full max-w-md mt-3">
+            <div className="text-[10px] font-mono tracking-[2px] text-emerald-400/50 mb-1 pl-1">LIVE SCAN LOG • SUBTITLE INGEST</div>
+            <div className="h-[92px] overflow-hidden border border-white/10 bg-black/50 rounded-xl p-3 text-xs font-mono text-emerald-400/90 flex flex-col justify-end gap-y-px">
+              <AnimatePresence>
+                {scanningLogs.map((log, idx) => (
+                  <motion.div 
+                    key={idx}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="leading-[1.1] truncate"
+                  >
+                    &gt; {log}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -428,7 +480,100 @@ export const DragZone: React.FC = () => {
         {/* Subtle color wash toned down for Windows Chrome color cast issues */}
         <div className="absolute inset-[-20px] bg-gradient-to-tr from-violet-600/[0.004] via-fuchsia-600/[0.002] to-transparent rounded-full filter blur-3xl opacity-25 group-hover/outer:opacity-50 transition-opacity duration-500 -z-20" />
 
-        {/* Bauhaus-inspired geometric composition（包豪斯风格几何构图）: 
+        {/* Borderless cinematic screen area（无边界但可感知的字幕放映区域）:
+            Large open "projection frame" without hard circular border.
+            Left/right film-strip perforations give clear perception of the drop zone.
+            Very subtle inner lighting and top highlight make the screen feel "lit" and special
+            without boxing the content. Perfect for subtitle/film theme.
+        */}
+        {/* Left film perforation strip（左侧胶片齿孔） - perceptible reel edge */}
+        <div className="absolute left-0 top-0 bottom-0 w-5 z-30 pointer-events-none flex flex-col justify-around py-3">
+          {Array.from({ length: 11 }).map((_, i) => (
+            <div key={i} className="mx-auto w-2.5 h-[5px] bg-black/80 rounded-[1px]" />
+          ))}
+        </div>
+
+        {/* Right film perforation strip */}
+        <div className="absolute right-0 top-0 bottom-0 w-5 z-30 pointer-events-none flex flex-col justify-around py-3">
+          {Array.from({ length: 11 }).map((_, i) => (
+            <div key={i} className="mx-auto w-2.5 h-[5px] bg-black/80 rounded-[1px]" />
+          ))}
+        </div>
+
+        {/* Main borderless screen - the perceptible drop target */}
+        <motion.div 
+          onClick={() => fileInputRef.current?.click()}
+          animate={isDragging 
+            ? { scale: 0.985, boxShadow: 'inset 0 0 90px rgba(0,0,0,0.95)' } 
+            : isZoneActive
+              ? { scale: 1.008, boxShadow: 'inset 0 0 70px rgba(0,0,0,0.85), 0 0 60px rgba(168,85,247,0.08)' }
+              : { scale: 1, boxShadow: 'inset 0 0 80px rgba(0,0,0,0.9)' }
+          }
+          transition={{ type: "spring", stiffness: 320, damping: 26 }}
+          className="relative w-full max-w-[920px] h-[310px] mx-auto bg-[#020203] flex flex-col items-center justify-center cursor-pointer overflow-hidden select-none z-10"
+        >
+          <ParticleCanvas mode={isDragging ? 'dragging' : (isZoneActive ? 'hover' : 'idle')} />
+
+          {/* Very subtle screen highlight for user perception without hard border */}
+          <div className="absolute inset-x-8 top-5 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+          <div className="absolute inset-x-8 bottom-5 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+
+          {/* 
+            Custom cinematic Ingest Lens icon (no generic AI cloud)
+            - aperture（光圈）: 多叶片结构，模拟真实相机/投影机镜头，增加电影感。
+            - dual-track waveform（双轨波形）: 两条波浪线代表双语字幕（中英轨），这是本工具的核心身份。
+            这个 SVG 比 <UploadCloud> 更有领域特征（domain-specific），避免 AI 模板感。
+          */}
+          {isDragging ? (
+            <div className="flex flex-col items-center gap-2 z-20">
+              <motion.div
+                animate={{ y: [-2, 2, -2] }}
+                transition={{ repeat: Infinity, duration: 1.1, ease: "easeInOut" }}
+              >
+                <svg width="48" height="48" viewBox="0 0 52 52" fill="none" className="drop-shadow-[0_0_12px_rgba(16,185,129,0.65)]">
+                  <circle cx="26" cy="26" r="23" stroke="#10b981" strokeWidth="1.5" strokeOpacity="0.6"/>
+                  <g stroke="#10b981" strokeWidth="1.25" strokeOpacity="0.9">
+                    <path d="M26 9 L26 17" /><path d="M26 35 L26 43" />
+                    <path d="M9 26 L17 26" /><path d="M35 26 L43 26" />
+                    <path d="M13.5 13.5 L19 19" /><path d="M33 33 L38.5 38.5" />
+                    <path d="M38.5 13.5 L33 19" /><path d="M19 33 L13.5 38.5" />
+                  </g>
+                  <path d="M18 26 Q21 22 24 26 Q27 30 30 26" stroke="#34d399" strokeWidth="1.1" fill="none" strokeOpacity="0.85"/>
+                  <path d="M18 29 Q21 25 24 29 Q27 33 30 29" stroke="#34d399" strokeWidth="0.9" fill="none" strokeOpacity="0.6"/>
+                </svg>
+              </motion.div>
+              <span className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-400 font-bold">RELEASE TO INGEST</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 z-20 text-center">
+              <div className="relative">
+                <svg width="62" height="62" viewBox="0 0 56 56" fill="none" 
+                  className={`transition-all duration-300 ${isZoneActive ? 'text-violet-400 drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]' : 'text-neutral-400/70'}`}>
+                  <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.25" strokeOpacity="0.55" />
+                  <g stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.75">
+                    <path d="M28 5.5 L28 13" /><path d="M28 43 L28 50.5" />
+                    <path d="M5.5 28 L13 28" /><path d="M43 28 L50.5 28" />
+                    <path d="M10 10 L16.5 16.5" /><path d="M39.5 39.5 L46 46" />
+                    <path d="M46 10 L39.5 16.5" /><path d="M16.5 39.5 L10 46" />
+                  </g>
+                  <path d="M19 28 Q23 24 27 28 Q31 32 35 28" stroke="currentColor" strokeWidth="1.6" strokeOpacity="0.9" fill="none"/>
+                  <path d="M19 31.5 Q23 27.5 27 31.5 Q31 35.5 35 31.5" stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.55" fill="none"/>
+                </svg>
+              </div>
+
+              <div>
+                <div className="text-[15px] font-mono font-bold tracking-[3.2px] text-white/95">SUBTITLE FRAME</div>
+                <div className="text-[10px] text-neutral-500 tracking-[1px] mt-0.5">DROP FILES TO PROJECT INTO REEL</div>
+              </div>
+
+              <div className="flex gap-3 text-[9px] font-mono tracking-[1.5px] text-neutral-600 mt-1">
+                <span>SRT</span><span className="text-white/15">•</span><span>ASS</span><span className="text-white/15">•</span><span>ZIP</span>
+              </div>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Old Bauhaus geometric composition removed for borderless screen design. Kept for reference in git history. */}
             强调干净的原色线条、圆形与直线的精确相交、功能性构图，而非过度装饰的虚线旋转环。
             保留缓慢的机械式旋转以体现专业、精确的“镜头”感，同时增加不对称的动态元素。
         */}
