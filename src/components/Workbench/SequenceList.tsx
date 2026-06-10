@@ -119,7 +119,8 @@ export const SequenceList: React.FC = () => {
               const rowClass = `relative flex gap-6 py-4 px-8 border-b border-white/[0.04] cursor-pointer text-left overflow-hidden transition-all duration-400
                 ${isActive ? 'glass-lens-active' : 'bg-transparent hover:bg-white/[0.015]'}
                 ${(!isActive && hasActiveRow) ? 'glass-blur-inactive' : ''}
-                ${isLyric && !isActive ? 'bg-violet-500/[0.005]' : ''}`;
+                ${isLyric && !isActive ? 'bg-violet-500/[0.005]' : ''}
+                [content-visibility:auto] [contain-intrinsic-size:80px]`;
 
               return (
                 <div

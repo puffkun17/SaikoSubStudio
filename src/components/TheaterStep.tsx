@@ -24,6 +24,7 @@ export const TheaterStep: React.FC = () => {
     saveToLibrary,
     customStyle,
     sceneBackground,
+    setSceneBackground,
     tmdbBackdrop,
     theaterAspect,
     showGuides,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStudioStore } from '@/store/useStudioStore';
 import { LayoutGrid, Eye, ChevronDown, ChevronUp, Save, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -105,6 +105,10 @@ export const StyleSidebar: React.FC = () => {
     if (!sub.text) return false;
     return /[♪♫♬♩🎵🎶]/.test(sub.text);
   });
+
+  useEffect(() => {
+    setIsLyricsExpanded(!!hasLyrics);
+  }, [hasLyrics]);
 
   const handleApplyPreset = (preset: any) => {
     setActivePreset(preset.id);
@@ -383,7 +387,8 @@ export const StyleSidebar: React.FC = () => {
           </div>
         </div>
 
-        {/* Lyrics Styles (Foldable with Smooth Elastic motion) */}
+        {/* Lyrics Styles (Foldable with Smooth Elastic motion) - auto hidden if no lyrics per audit */}
+        {hasLyrics && (
         <div className="flex flex-col gap-2 pb-4">
           <div 
             className="flex justify-between items-center cursor-pointer select-none group"
@@ -467,6 +472,7 @@ export const StyleSidebar: React.FC = () => {
             )}
           </AnimatePresence>
         </div>
+        )}
       </div>
     </div>
   );
