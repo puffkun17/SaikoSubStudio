@@ -57,8 +57,19 @@ body {
   margin: 0;
   overflow: hidden;
   font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* CJK readability on dark UI */
+  font-feature-settings: "tnum" "palt";
   /* Help reduce color shift and noise visibility on Windows Chrome */
   transform: translateZ(0);
+}
+
+/* Prevent almost unreadable tiny text globally */
+.text-\[9px\], .text-\[10px\] {
+  font-size: 11px !important;
+  line-height: 1.35 !important;
 }
 
 /* Global button push feedback */

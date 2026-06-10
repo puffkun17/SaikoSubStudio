@@ -362,86 +362,115 @@ export const DragZone: React.FC = () => {
 
   if (isParsing) {
     return (
-      <div className="w-full max-w-4xl p-8 relative flex flex-col items-center justify-center min-h-[400px]">
-        {/* Holographic scanner layout */}
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-950/[0.02] to-transparent rounded-[40px] pointer-events-none -z-20" />
+      <div className="w-full max-w-5xl mx-auto relative flex flex-col items-center justify-center min-h-[520px]">
+        {/* Unified holographic interface background for consistent visual feel */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#a855f7_0%,transparent_70%)] opacity-[0.03] pointer-events-none -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-950/[0.015] to-transparent pointer-events-none -z-10" />
+
         <ParticleCanvas mode="parsing" />
-        
-        {/* Scanning laser beam effect */}
-        <motion.div 
-          animate={{ y: [-150, 150, -150] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-10 right-10 h-0.5 bg-gradient-to-r from-transparent via-violet-400 to-transparent shadow-[0_0_12px_rgba(168,85,247,0.8)] pointer-events-none z-10"
-        />
 
-        <div className="flex flex-col items-center gap-8 w-full z-10 text-center">
-          {/* Holographic scanner lens */}
-          <div className="relative w-36 h-36 rounded-full border border-violet-500/20 flex items-center justify-center flex-shrink-0 bg-white/[0.005] shadow-[0_0_30px_rgba(168,85,247,0.05)]">
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 border border-dashed border-violet-400/40 rounded-full"
-            />
-            <motion.div 
-              animate={{ rotate: -360 }}
-              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-2 border border-dotted border-violet-500/30 rounded-full"
-            />
-            <UploadCloud className="w-12 h-12 text-violet-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+        {/* Advanced layered holographic core (replacing simple cloud + basic geo with sophisticated design) */}
+        {/* References high-end holographic UIs: layered depth, independent motion, gradient glows, geometric precision for premium feel */}
+        <div className="relative z-10 w-72 h-72 flex items-center justify-center mb-6">
+          {/* Outer energy field - soft volumetric glow for depth */}
+          <div className="absolute inset-0 bg-violet-500/10 rounded-full blur-3xl" />
+
+          {/* Layer 1: Slow outer ring - energy field */}
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 border-[1.5px] border-violet-500/25 rounded-full"
+          />
+
+          {/* Layer 2: Dashed mid ring - data orbit */}
+          <motion.div 
+            animate={{ rotate: -360 }}
+            transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-6 border border-dashed border-violet-400/40 rounded-full"
+          />
+
+          {/* Layer 3: Inner geometric accent for sophistication (Bauhaus-inspired precision + holo) */}
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-12 border border-violet-500/15 rounded-full"
+          />
+
+          {/* Core orb with gradient for holo depth */}
+          <div className="relative z-10 w-40 h-40 rounded-full bg-gradient-to-br from-violet-400/15 via-transparent to-emerald-400/10 flex items-center justify-center shadow-[0_0_60px_rgba(168,85,247,0.35)]">
+            {/* Premium icon - advanced design instead of simple cloud */}
+            {/* Clean geometric lens with film/subtitle elements, gradient core, multiple strokes for depth */}
+            <svg width="68" height="68" viewBox="0 0 56 56" fill="none" 
+              className="text-violet-400 drop-shadow-[0_0_20px_rgba(168,85,247,0.7)]">
+              <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.5" />
+              <rect x="8" y="20" width="40" height="16" rx="2" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.75" fill="none" />
+              {/* Subtitle tracks as clean lines */}
+              <line x1="10" y1="16" x2="46" y2="16" stroke="#a855f7" strokeWidth="1.2" strokeOpacity="0.85" />
+              <line x1="10" y1="40" x2="46" y2="40" stroke="#a855f7" strokeWidth="1.2" strokeOpacity="0.85" />
+              {/* Inner focus with subtle fill for holo volume */}
+              <circle cx="28" cy="28" r="7" fill="currentColor" fillOpacity="0.15" />
+              <circle cx="28" cy="28" r="3.5" fill="currentColor" fillOpacity="0.3" />
+            </svg>
           </div>
 
-          {/* Details / File list */}
-          <div className="flex flex-col gap-4 w-full max-w-md">
-            <div>
-              <h3 className="text-lg md:text-xl font-bold text-white tracking-wider font-mono uppercase flex items-center justify-center gap-2">
-                HOLOGRAPHIC SCANNING
-                <span className="flex gap-1 ml-1">
-                  <motion.span animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
-                  <motion.span animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }} className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
-                  <motion.span animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.6 }} className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
-                </span>
-              </h3>
-              <p className="text-xs text-neutral-500 mt-1 font-mono uppercase tracking-[0.1em]">
-                indexing subtitle sync structures
-              </p>
-            </div>
-            
-            <div className="flex flex-col gap-2.5 max-h-[160px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/[0.03]">
-              <AnimatePresence>
-                {parsingFiles.map((pf, idx) => (
-                  <motion.div 
-                    key={idx} 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="flex justify-between items-center p-3 bg-white/[0.01] border border-white/[0.04] rounded-xl text-xs font-mono gap-3"
-                  >
-                    <div className="min-w-0 flex-1 flex items-center gap-3">
-                      <FileText className="w-4 h-4 text-violet-400/50 flex-shrink-0" />
-                      <span className="text-white/70 truncate">{pf.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0 font-bold text-xs tracking-wider">
-                      {pf.status === 'reading' && <span className="text-white/40 animate-pulse">READING</span>}
-                      {pf.status === 'analyzing' && <span className="text-violet-400 animate-pulse">ANALYZING</span>}
-                      {pf.status === 'success' && <span className="text-emerald-400 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" />READY</span>}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
+          {/* Dynamic scan beam - enhanced with gradient and shadow for premium volumetric feel */}
+          <motion.div 
+            animate={{ y: [-35, 35, -35], opacity: [0.35, 0.85, 0.35] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_16px_rgba(16,185,129,0.6)] pointer-events-none"
+          />
+        </div>
+
+        {/* Unified info display - combined animation + Chinese prompts in one holographic interface for consistent visual/UX */}
+        <div className="relative z-20 w-full max-w-lg text-center -mt-2">
+          {/* Title as holo projection - integrated with the core visual */}
+          <div className="mb-3">
+            <h3 className="text-xl md:text-2xl font-bold text-white tracking-[3px] font-mono uppercase flex items-center justify-center gap-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]">
+              HOLOGRAPHIC SCANNING
+              <span className="flex gap-1 ml-1">
+                <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0 }} className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
+                <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.25 }} className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
+                <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.5 }} className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
+              </span>
+            </h3>
+            <p className="text-xs text-neutral-400 mt-1 font-mono tracking-[1.5px] uppercase">
+              indexing subtitle sync structures
+            </p>
           </div>
 
-          {/* Extended cool scanning log with scrolling information prompts */}
-          <div className="w-full max-w-md mt-3">
-            <div className="text-[10px] font-mono tracking-[2px] text-emerald-400/50 mb-1 pl-1">LIVE SCAN LOG • SUBTITLE INGEST</div>
-            <div className="h-[92px] overflow-hidden border border-white/10 bg-black/50 rounded-xl p-3 text-xs font-mono text-emerald-400/90 flex flex-col justify-end gap-y-px">
+          {/* File status as integrated holo readout */}
+          <div className="flex flex-col gap-1.5 max-h-[90px] overflow-y-auto mb-3 text-xs font-mono">
+            <AnimatePresence>
+              {parsingFiles.map((pf, idx) => (
+                <motion.div 
+                  key={idx} 
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.03 }}
+                  className="flex justify-between items-center px-3 py-1 bg-white/[0.015] border border-white/[0.03] rounded text-white/80"
+                >
+                  <span className="truncate pr-2">{pf.name}</span>
+                  <span className="font-bold tracking-wider text-[10px] text-white/60">
+                    {pf.status === 'reading' && 'READING'}
+                    {pf.status === 'analyzing' && 'ANALYZING'}
+                    {pf.status === 'success' && 'READY'}
+                  </span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* Unified live scan log - now part of the central holographic experience */}
+          <div className="w-full">
+            <div className="text-[9px] font-mono tracking-[1.5px] text-emerald-400/60 mb-1 text-left pl-1">LIVE SCAN LOG</div>
+            <div className="h-20 overflow-hidden border border-white/10 bg-black/60 rounded-xl p-2.5 text-xs font-mono text-emerald-400/90 flex flex-col justify-end gap-y-px shadow-inner">
               <AnimatePresence>
                 {scanningLogs.map((log, idx) => (
                   <motion.div 
                     key={idx}
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="leading-[1.1] truncate"
+                    className="leading-tight truncate"
                   >
                     &gt; {log}
                   </motion.div>
@@ -514,52 +543,44 @@ export const DragZone: React.FC = () => {
               animate={{ y: [-2, 2, -2] }}
               transition={{ repeat: Infinity, duration: 1.1, ease: "easeInOut" }}
             >
-              <svg width="48" height="48" viewBox="0 0 52 52" fill="none" className="drop-shadow-[0_0_12px_rgba(16,185,129,0.65)]">
-                <circle cx="26" cy="26" r="23" stroke="#10b981" strokeWidth="1.5" strokeOpacity="0.6"/>
-                <g stroke="#10b981" strokeWidth="1.25" strokeOpacity="0.9">
-                  <path d="M26 9 L26 17" />
-                  <path d="M26 35 L26 43" />
-                  <path d="M9 26 L17 26" />
-                  <path d="M35 26 L43 26" />
-                  <path d="M13.5 13.5 L19 19" />
-                  <path d="M33 33 L38.5 38.5" />
-                  <path d="M38.5 13.5 L33 19" />
-                  <path d="M19 33 L13.5 38.5" />
-                </g>
-                <path d="M18 26 Q21 22 24 26 Q27 30 30 26" stroke="#34d399" strokeWidth="1.1" fill="none" strokeOpacity="0.85"/>
-                <path d="M18 29 Q21 25 24 29 Q27 33 30 29" stroke="#34d399" strokeWidth="0.9" fill="none" strokeOpacity="0.6"/>
+              <svg width="52" height="52" viewBox="0 0 52 52" fill="none" className="drop-shadow-[0_0_14px_rgba(16,185,129,0.7)]">
+                {/* Clean outer ring */}
+                <circle cx="26" cy="26" r="23" stroke="#10b981" strokeWidth="2" strokeOpacity="0.7" />
+                {/* Inner bold film base */}
+                <rect x="12" y="22" width="28" height="8" rx="1" stroke="#10b981" strokeWidth="1.5" strokeOpacity="0.9" fill="none" />
+                {/* Subtitle lines (two clean tracks) */}
+                <line x1="14" y1="19" x2="38" y2="19" stroke="#34d399" strokeWidth="1.2" strokeOpacity="0.85" />
+                <line x1="14" y1="33" x2="38" y2="33" stroke="#34d399" strokeWidth="1.2" strokeOpacity="0.85" />
+                {/* Small center marker for "lens" focus */}
+                <circle cx="26" cy="26" r="3" fill="#10b981" fillOpacity="0.4" />
               </svg>
             </motion.div>
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-400 font-bold">RELEASE TO INGEST</span>
+            <span className="text-xs font-mono tracking-[0.2em] text-emerald-400 font-semibold">松手投射</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 z-20 text-center">
             <div className="relative">
-              <svg width="62" height="62" viewBox="0 0 56 56" fill="none" 
-                className={`transition-all duration-300 ${isZoneActive ? 'text-violet-400 drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]' : 'text-neutral-400/70'}`}>
-                <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.25" strokeOpacity="0.55" />
-                <g stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.75">
-                  <path d="M28 5.5 L28 13" />
-                  <path d="M28 43 L28 50.5" />
-                  <path d="M5.5 28 L13 28" />
-                  <path d="M43 28 L50.5 28" />
-                  <path d="M10 10 L16.5 16.5" />
-                  <path d="M39.5 39.5 L46 46" />
-                  <path d="M46 10 L39.5 16.5" />
-                  <path d="M16.5 39.5 L10 46" />
-                </g>
-                <path d="M19 28 Q23 24 27 28 Q31 32 35 28" stroke="currentColor" strokeWidth="1.6" strokeOpacity="0.9" fill="none"/>
-                <path d="M19 31.5 Q23 27.5 27 31.5 Q31 35.5 35 31.5" stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.55" fill="none"/>
+              <svg width="64" height="64" viewBox="0 0 56 56" fill="none" 
+                className={`transition-all duration-300 ${isZoneActive ? 'text-violet-400 drop-shadow-[0_0_18px_rgba(168,85,247,0.65)]' : 'text-neutral-400/70'}`}>
+                {/* Clean outer ring */}
+                <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="1.8" strokeOpacity="0.6" />
+                {/* Bold film base (horizontal rectangle for reel feel) */}
+                <rect x="10" y="22" width="36" height="12" rx="2" stroke="currentColor" strokeWidth="1.6" strokeOpacity="0.85" fill="none" />
+                {/* Two clean subtitle track lines */}
+                <line x1="12" y1="18" x2="44" y2="18" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.9" />
+                <line x1="12" y1="38" x2="44" y2="38" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.9" />
+                {/* Subtle center focus dot */}
+                <circle cx="28" cy="28" r="4" fill="currentColor" fillOpacity="0.25" />
               </svg>
             </div>
 
             <div>
-              <div className="text-[15px] font-mono font-bold tracking-[3.2px] text-white/95">SUBTITLE FRAME</div>
-              <div className="text-[10px] text-neutral-500 tracking-[1px] mt-0.5">DROP FILES TO PROJECT INTO REEL</div>
+              <div className="text-lg font-mono font-semibold tracking-[2px] text-white/95">字幕画框</div>
+              <div className="text-xs text-neutral-400 tracking-wide mt-1">拖入文件投射到画框</div>
             </div>
 
-            <div className="flex gap-3 text-[9px] font-mono tracking-[1.5px] text-neutral-600 mt-1">
-              <span>SRT</span><span className="text-white/15">•</span><span>ASS</span><span className="text-white/15">•</span><span>ZIP</span>
+            <div className="flex gap-3 text-xs font-mono tracking-[1px] text-neutral-400 mt-2">
+              <span>SRT</span><span className="text-white/20">·</span><span>ASS</span><span className="text-white/20">·</span><span>ZIP</span>
             </div>
           </div>
         )}
