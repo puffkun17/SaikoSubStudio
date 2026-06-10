@@ -280,9 +280,14 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
               </div>
             )}
 
+            {/* Perceptible cinema screen frame (遮罩边界) — clean scope edge so the projected 剧照 has clear presence without a TV bezel */}
+            <div className="absolute inset-0 rounded-sm border border-white/[0.07] pointer-events-none z-20" />
+            <div className="absolute inset-0 rounded-sm" 
+                 style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.025), inset 0 0 70px rgba(0,0,0,0.65), 0 0 90px rgba(168,85,247,0.07)' }} />
+            
             {/* Subtle scope edge glow / projector spill */}
             <div className="absolute -inset-[1px] rounded-sm pointer-events-none z-10" 
-                 style={{ boxShadow: 'inset 0 0 80px rgba(0,0,0,0.6), 0 0 80px rgba(168,85,247,0.06)' }} />
+                 style={{ boxShadow: '0 0 80px rgba(168,85,247,0.06)' }} />
           </div>
         </div>
       ) : (
