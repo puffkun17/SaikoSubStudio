@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans CN", sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", "PingFang SC", "Microsoft YaHei", monospace;
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans CN", "Noto Sans SC", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", "PingFang SC", "Microsoft YaHei", "Source Han Sans CN", "Noto Sans SC", monospace;
   --color-accent-neon: #a855f7;
   --color-accent-glow: rgba(168, 85, 247, 0.12);
   --color-accent-emerald: #10b981;
@@ -19,6 +19,14 @@
   --color-surface-2: #0b0b12;
   --color-surface-3: #10101a;
   
+  /* Consistent type scale for aesthetics and readability (esp. Chinese on dark) */
+  --text-xs: 0.75rem;    /* 12px - labels, badges, meta (was too small/jarring) */
+  --text-sm: 0.875rem;   /* 14px - body, dropdown content */
+  --text-base: 1rem;     /* 16px - default */
+  --text-lg: 1.125rem;   /* 18px - panel titles, emphasis */
+  --text-xl: 1.25rem;    /* 20px - section headers */
+  --text-2xl: 1.5rem;    /* 24px - main titles like movie name */
+  
   --text-h1: 3.815rem;
   --text-h4: 1.953rem;
   --text-h6: 1.25rem;
@@ -31,13 +39,16 @@
 
 h1 {
   font-size: var(--text-h1);
+  line-height: 1.1;
 }
 h4 {
   font-size: var(--text-h4);
+  line-height: 1.2;
 }
 h6 {
   font-size: var(--text-h6);
   font-weight: normal;
+  line-height: 1.3;
 }
 
 html {
@@ -60,16 +71,24 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* CJK readability on dark UI */
   font-feature-settings: "tnum" "palt";
-  /* Help reduce color shift and noise visibility on Windows Chrome */
+  line-height: 1.6; /* better for Chinese body text on dark panels */
   transform: translateZ(0);
 }
 
-/* Prevent almost unreadable tiny text globally */
-.text-\[9px\], .text-\[10px\] {
-  font-size: 11px !important;
-  line-height: 1.35 !important;
+/* Consistent, aesthetic type scale + CJK readability (small sizes protected, better leading for Chinese) */
+.text-xs { font-size: var(--text-xs); line-height: 1.5; }
+.text-sm { font-size: var(--text-sm); line-height: 1.55; }
+.text-base { font-size: var(--text-base); line-height: 1.6; }
+.text-lg { font-size: var(--text-lg); line-height: 1.5; }
+.text-xl { font-size: var(--text-xl); line-height: 1.4; }
+.text-2xl { font-size: var(--text-2xl); line-height: 1.35; }
+
+/* Protect tiny text and boost Chinese readability on dark glass */
+.text-\[9px\], .text-\[10px\], .text-xs {
+  font-size: var(--text-xs) !important;
+  line-height: 1.5 !important;
+  font-feature-settings: "tnum" "palt";
 }
 
 /* Global button push feedback */

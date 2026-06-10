@@ -114,7 +114,7 @@ export const TrackSelect: React.FC<TrackSelectProps> = ({
             onClick={() => { onChange(''); setOpen(false); }}
           >
             {!value && <Check className="w-3 h-3 text-accent-gold flex-shrink-0" />}
-            <span className={!value ? 'pl-0' : 'pl-[18px]'}>-- 未绑定 --</span>
+            <span className={`text-sm ${!value ? 'pl-0' : 'pl-[18px]'} text-neutral-400`}>-- 未绑定 --</span>
           </button>
 
           {/* File options */}
@@ -133,9 +133,9 @@ export const TrackSelect: React.FC<TrackSelectProps> = ({
                   : <span className="w-3 flex-shrink-0" />
                 }
                 {getLangBadgeMini(opt.lang)}
-                <span className="flex-1 truncate font-mono text-xs md:text-sm">{truncateMiddle(opt.name)}</span>
+                <span className="flex-1 truncate font-mono text-sm">{truncateMiddle(opt.name)}</span>
                 {opt.count != null && (
-                  <span className="text-white/30 text-xs flex-shrink-0 font-mono">{opt.count}行</span>
+                  <span className="text-white/40 text-xs flex-shrink-0 font-mono tabular-nums">{opt.count}行</span>
                 )}
               </button>
             );

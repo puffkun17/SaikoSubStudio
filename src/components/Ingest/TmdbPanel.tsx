@@ -125,17 +125,17 @@ export const TmdbPanel: React.FC = () => {
               {/* Movie metadata (Title + Badges) */}
               <div className="flex-1 flex flex-col gap-3 min-w-0 text-left pt-1">
                 <div>
-                  <h4 className="text-h6 md:text-h4 font-extrabold text-neutral-100 leading-snug tracking-tight font-sans">
+                  <h4 className="text-2xl font-extrabold text-neutral-100 leading-snug tracking-tight font-sans">
                     {tmdbData.title}
                   </h4>
                   {tmdbData.originalTitle && tmdbData.originalTitle !== tmdbData.title && (
-                    <p className="text-xs text-neutral-450 mt-0.5 font-mono truncate">{tmdbData.originalTitle}</p>
+                    <p className="text-sm text-neutral-400 mt-0.5 font-mono truncate">{tmdbData.originalTitle}</p>
                   )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-1.5 select-none">
                   {tmdbData.year && (
-                    <span className="px-2 py-0.5 bg-white/[0.03] border border-white/[0.06] rounded-md text-xs font-mono font-bold text-neutral-350 tracking-wider">
+                    <span className="px-2 py-0.5 bg-white/[0.03] border border-white/[0.06] rounded-md text-xs font-mono font-bold text-neutral-300 tracking-wider">
                       {tmdbData.year}
                     </span>
                   )}
@@ -176,8 +176,8 @@ export const TmdbPanel: React.FC = () => {
               </div>
             </div>
 
-            {/* Bottom Row: Synopsis text (Full width, more space to expand) */}
-            <div className="border-l-2 border-violet-500/30 pl-3.5 py-0.5 text-xs lg:text-sm text-neutral-350 leading-relaxed font-sans text-left line-clamp-5 lg:line-clamp-6 min-h-0 w-full">
+            {/* Bottom Row: Synopsis text - consistent scale, better CJK leading for readability */}
+            <div className="border-l-2 border-violet-500/30 pl-3.5 py-0.5 text-sm text-neutral-300 leading-[1.65] font-sans text-left line-clamp-5 lg:line-clamp-6 min-h-0 w-full">
               {tmdbData.overview || '暂无剧情简介...'}
             </div>
           </motion.div>
@@ -186,9 +186,9 @@ export const TmdbPanel: React.FC = () => {
             <div className="relative p-4 rounded-full bg-white/[0.005] border border-white/5 shadow-[0_0_25px_rgba(139,92,246,0.03)] group-hover:border-violet-500/10 transition-colors">
               <Database className="w-10 h-10 opacity-30 text-violet-400" />
             </div>
-            <p className="text-sm text-neutral-400 max-w-[28ch] leading-relaxed">
+            <p className="text-sm text-neutral-300 max-w-[28ch] leading-[1.6]">
               暂未匹配影视元数据<br/>
-              <span className="text-xs font-mono text-neutral-500 mt-1 block">关联字幕文件后将自动检索元数据</span>
+              <span className="text-xs font-mono text-neutral-400 mt-1 block">关联字幕文件后将自动检索元数据</span>
             </p>
             <div className="opacity-30 hover:opacity-75 transition-opacity duration-300 mt-4 flex flex-col items-center gap-1.5">
               <span className="text-[0.625rem] font-mono uppercase tracking-widest text-neutral-400">数据支持</span>
@@ -295,7 +295,7 @@ export const TmdbPanel: React.FC = () => {
                 {/* Candidates List */}
                 {tmdbSuggestions.length > 0 && (
                   <div className="flex flex-col gap-3 mt-4">
-                    <span className="text-xs text-white/50 font-medium">候选结果 ({tmdbSuggestions.length})</span>
+                    <span className="text-xs text-white/60 font-medium">候选结果 ({tmdbSuggestions.length})</span>
                     <div className="flex flex-col gap-2">
                       {tmdbSuggestions.map(s => {
                         const isChosen = pendingSuggestion?.id === s.id || (!pendingSuggestion && selectedSuggestion?.id === s.id);
