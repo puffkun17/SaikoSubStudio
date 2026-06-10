@@ -167,7 +167,7 @@ const ParticleCanvas: React.FC<{ mode: 'idle' | 'hover' | 'dragging' | 'parsing'
 };
 
 export const DragZone: React.FC = () => {
-  const { isDragging, setIsDragging, processFiles, addLog, searchTmdb } = useStudioStore();
+  const { isDragging, setIsDragging, processFiles, addLog, searchTmdb, selectTmdbSuggestion, tmdbSuggestions } = useStudioStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const dragCounterRef = useRef(0);
@@ -285,7 +285,6 @@ export const DragZone: React.FC = () => {
 
     if (detectedFiles.length > 0) {
       appendScanLog('ANALYZING SUBTITLE TRACKS...');
-      setCurrentHoloInfo('[剧照随机] 已从99张物料中随机提取到临场感剧照');
       setParsingFiles(validFiles.map(f => ({ name: f.name, size: f.size, status: 'analyzing' })));
       await sleep(650);
 
@@ -312,10 +311,17 @@ export const DragZone: React.FC = () => {
       setCurrentHoloInfo(`✓ 成功绑定影视数据: ${displayTitle}`);
       await sleep(300);
 
-      // Complete - now transition with preloaded data ready
+      processFiles(detectedFiles);
+      await sleep(90);
+      try {
+        const s = useStudioStore.getState();
+        if (s.tmdbSuggestions && s.tmdbSuggestions.length > 0 && s.selectedTaskId) {
+          await s.selectTmdbSuggestion(s.tmdbSuggestions[0]).catch(() => {});
+        }
+      } catch {}
+
       setIsParsing(false);
       setScanningLogs([]);
-      processFiles(detectedFiles);
     } else {
       setIsParsing(false);
       setScanningLogs([]);
