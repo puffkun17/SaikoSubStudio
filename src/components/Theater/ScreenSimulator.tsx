@@ -189,6 +189,8 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
   const maskAspect = isCrt ? '1536/1288' : '1725/1058';
   const maskImg = isCrt ? '/tv-crt_v2.png' : '/tv-modern_v2.png';
 
+  // These % are calibrated to the native PNG glass area.
+  // They assume the mask image is rendered without stretch (object-contain).
   const screenPos = isCrt 
       ? { left: '10.8073%', top: '11.4907%', width: '78.3854%', height: '71.0404%' }
       : { left: '1.6812%', top: '3.8752%', width: '96.0000%', height: '90.3592%' };
@@ -217,7 +219,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
 
   return (
     <div 
-      className="flex-1 flex justify-center items-center bg-[#050507] w-full h-full overflow-hidden p-6 md:p-12 relative"
+      className="flex-1 flex justify-center items-center bg-[#050507] w-full h-full overflow-hidden p-4 md:p-8 relative"
       onMouseEnter={triggerTempGuides}
       onMouseMove={triggerTempGuides}
     >
@@ -227,16 +229,31 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
         <div className="absolute bottom-[20%] right-[20%] w-[45%] h-[45%] rounded-full bg-aurora-glow-emerald" />
       </div>
 
-      {/* Always use the TV frame mask (遮罩) to simulate playback on a TV.
-          The selected theaterAspect (e.g. 2.39:1) creates the letterboxed video window inside the TV.
-          This lets you check subtitle position and appearance inside the 2.39:1 active picture area on a TV. */}
+      {/* TV Frame + 真实阅片环境模拟
+          关键修复：
+          - 外层不再用 aspectRatio 强制拉伸 PNG（避免 bezel 变形）
+          - img 使用 object-contain 保持 PNG 原始比例（真实电视外形）
+          - screenPos % 现在相对于未拉伸的图像，更准确对应玻璃区域
+          - 内部视频窗口严格使用选择的 innerAspect（16:9 / 2.39:1 等）
+          - 字幕 cqh 基于正确的内部画面区域
+      */}
       <div 
-        className="relative flex justify-center items-center fade-in-up border border-white/[0.06] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.5)] z-10"
-        style={{ aspectRatio: maskAspect, maxWidth: '100%', maxHeight: '100%', height: '100%' }}
+        className="relative fade-in-up border border-white/[0.06] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.5)] z-10"
+        style={{ 
+          maxWidth: 'min(100%, 860px)', 
+          maxHeight: 'min(100%, 560px)',
+          width: 'fit-content',
+          height: 'fit-content'
+        }}
       >
-        <img src={maskImg} className="absolute inset-0 w-full h-full object-fill pointer-events-none z-20 drop-shadow-2xl" alt="TV Frame" />
+        {/* 电视遮罩 PNG - 保持原始比例，不拉伸 */}
+        <img 
+          src={maskImg} 
+          className="block w-auto h-auto max-w-full max-h-full object-contain pointer-events-none z-20 drop-shadow-2xl" 
+          alt="TV Frame" 
+        />
 
-        {/* The TV's physical glass / display area (black bars will appear around the inner aspect window) */}
+        {/* TV 玻璃显示区域（黑色底 + 内容） */}
         <div 
           className="absolute overflow-hidden z-10"
           style={{
@@ -247,8 +264,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
             backgroundColor: '#000'
           }}
         >
-          {/* Inner video window — exact chosen aspect (2.39:1 etc.), filled with the 剧照 as the "video" content.
-              Black letterbox bars are created by the centering + aspect constraint against the TV glass. */}
+          {/* 内部视频画面 - 严格按照选择的画幅比例 (theaterAspect) */}
           <div 
             className="absolute inset-0 flex items-center justify-center"
             style={{ backgroundColor: 'transparent' }}
@@ -283,7 +299,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 </div>
               )}
 
-              {/* Subtitle layers — constrained to the 2.39:1 (or chosen) video window */}
+              {/* Subtitle layers — constrained to the chosen aspect video window */}
               {topElement && (
                 <div className="absolute left-[5%] right-[5%] flex flex-col items-center justify-start text-center pointer-events-none select-none z-40 transition-all duration-200" style={{ top: `${paddingBottomCqh * 0.8}cqh` }}>
                   {topElement}
