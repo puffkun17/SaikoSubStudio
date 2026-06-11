@@ -81,7 +81,7 @@ export const IngestStep: React.FC = () => {
       <div className="flex items-center gap-2 mb-2 select-none z-20 flex-shrink-0">
         <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping" />
         <span className="text-[0.625rem] font-mono uppercase tracking-[0.3em] text-violet-400/70">
-          工作区 // 片源与字幕对齐绑定
+          阅片环境初始化 // 片源与字幕对齐绑定
         </span>
       </div>
 

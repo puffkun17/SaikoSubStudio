@@ -35,6 +35,9 @@ export interface StyleSettings {
   lyricColor?: string;
   lyricItalic?: boolean;
   lyricPosition?: 'top' | 'bottom';
+  // 新增：字体家族选择（支持阅片环境下的专业 CJK 协调）
+  zhFontFamily?: string;
+  enFontFamily?: string;
 }
 
 /**

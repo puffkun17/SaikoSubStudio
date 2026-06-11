@@ -67,7 +67,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
             fontWeight: 500,
             textShadow: getOutlineShadow('#000000'),
             lineHeight: 1.25,
-            fontFamily: 'system-ui, sans-serif',
+            fontFamily: style.zhFontFamily || 'system-ui, "PingFang SC", "Noto Sans SC", sans-serif',
             whiteSpace: 'pre-wrap'
           }}
         >
@@ -89,7 +89,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 fontStyle: lyricItalic ? 'italic' : 'normal',
                 textShadow: getOutlineShadow('#000000'),
                 lineHeight: 1.25,
-                fontFamily: 'system-ui, sans-serif'
+                fontFamily: style.zhFontFamily || 'system-ui, "PingFang SC", "Noto Sans SC", sans-serif'
               }}
             >
               {lyricZh}
@@ -106,7 +106,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 textShadow: getOutlineShadow('#000000'),
                 lineHeight: 1.2,
                 transform: `scale(${style.enScale ? style.enScale / 100 : 0.9})`,
-                fontFamily: 'Helvetica Neue, Arial, sans-serif'
+                fontFamily: style.enFontFamily || 'Helvetica Neue, Arial, "Inter", sans-serif'
               }}
             >
               {lyricEn}
@@ -134,7 +134,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 fontWeight: 700,
                 textShadow: getOutlineShadow(style.zhOutline),
                 lineHeight: 1.25,
-                fontFamily: 'system-ui, sans-serif'
+                fontFamily: style.zhFontFamily || 'system-ui, "PingFang SC", "Noto Sans SC", sans-serif'
               }}
             >
               {zh}
@@ -150,7 +150,7 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
                 textShadow: getOutlineShadow(style.enOutline || '#000000'),
                 lineHeight: 1.2,
                 transform: `scale(${style.enScale ? style.enScale / 100 : 0.9})`,
-                fontFamily: 'Helvetica Neue, Arial, sans-serif'
+                fontFamily: style.enFontFamily || 'Helvetica Neue, Arial, "Inter", sans-serif'
               }}
             >
               {en}

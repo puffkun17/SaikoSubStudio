@@ -7,6 +7,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const PRESET_COLORS = ['#FFFFFF', '#E0E0E0', '#B0B0B0', '#F2A900', '#FF9C41', '#FF4D4D', '#A8E6CF', '#A0C4FF', '#000000'];
 
+const FONT_FAMILIES_ZH = [
+  { value: 'system-ui, "PingFang SC", "Noto Sans SC", sans-serif', label: '系统 / 苹方' },
+  { value: '"PingFang SC", "Noto Sans SC", sans-serif', label: '苹方 SC' },
+  { value: '"Noto Sans SC", "Source Han Sans CN", sans-serif', label: '思源黑体' },
+  { value: 'system-ui, sans-serif', label: '系统默认' },
+];
+
+const FONT_FAMILIES_EN = [
+  { value: 'Helvetica Neue, Arial, "Inter", sans-serif', label: 'Helvetica Neue' },
+  { value: 'Inter, Arial, sans-serif', label: 'Inter' },
+  { value: 'Arial, Helvetica, sans-serif', label: 'Arial' },
+  { value: 'system-ui, sans-serif', label: '系统默认' },
+];
+
 const ColorPicker = ({ 
   label, 
   value, 
@@ -138,7 +152,10 @@ export const StyleSidebar: React.FC = () => {
       maxLenEn: 80,
       resolution: '1080p' as const,
       aspectRatio: '16:9' as const,
-      globalScale: 1.0
+      globalScale: 1.0,
+      // 阅片环境字体协调默认值
+      zhFontFamily: 'system-ui, "PingFang SC", "Noto Sans SC", sans-serif',
+      enFontFamily: 'Helvetica Neue, Arial, "Inter", sans-serif'
     };
     setCustomStyle(defaultStyle);
     if (typeof window !== 'undefined') {
@@ -166,6 +183,22 @@ export const StyleSidebar: React.FC = () => {
     setTemplateNameInput('');
     setShowTemplateSave(false);
   };
+
+  // 字体选择器组件
+  const FontFamilySelect = ({ label, value, options, onChange }: { label: string; value: string; options: any[]; onChange: (v: string) => void }) => (
+    <div className="flex items-center justify-between py-2 border-b border-white/[0.03]">
+      <span className="text-xs text-neutral-400 font-mono uppercase tracking-wider font-bold">{label}</span>
+      <select
+        className="bg-white/[0.02] border border-white/[0.08] focus:border-white/15 rounded-lg text-xs px-2 py-1 text-neutral-300 outline-none cursor-pointer transition-all w-40 text-right"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+      >
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4 p-4 text-left w-full h-full bg-transparent overflow-y-auto scrollbar-thin">
@@ -279,11 +312,32 @@ export const StyleSidebar: React.FC = () => {
       <div className="flex flex-col gap-4 flex-1">
         <span className="text-xs text-neutral-400 font-mono uppercase tracking-wider select-none pl-0.5 font-bold">参数微调</span>
         
-        {/* Font Sizes & Sliders with active zoom */}
+        {/* 整体缩放 (globalScale) - 高优先暴露 */}
+        <div className="flex flex-col gap-1 border-b border-white/[0.04] pb-3">
+          <div className="flex justify-between text-xs font-mono tracking-wider font-bold uppercase text-neutral-400 select-none">
+            <span>整体缩放 (Global Scale)</span>
+            <motion.span 
+              animate={{ scale: [1, 1.05, 1] }} 
+              key={customStyle.globalScale ?? 1}
+              className="font-mono text-violet-400 font-bold text-xs"
+            >
+              {(customStyle.globalScale ?? 1).toFixed(2)}×
+            </motion.span>
+          </div>
+          <input 
+            type="range" min="0.6" max="1.8" step="0.05"
+            value={customStyle.globalScale ?? 1}
+            onChange={e => handleStyleChange('globalScale', parseFloat(e.target.value))}
+            className="w-full glass-slider-input"
+          />
+          <div className="text-[10px] text-neutral-500 font-mono">影响所有字号的最终换算（阅片环境一致性关键）</div>
+        </div>
+
+        {/* Font Sizes & Sliders */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <div className="flex justify-between text-xs font-mono tracking-wider font-bold uppercase text-neutral-400 select-none">
-              <span>中文字号</span>
+              <span>中文字号 (参考单位 / ASS)</span>
               <motion.span 
                 animate={{ scale: [1, 1.05, 1] }} 
                 key={customStyle.zhFontSize} 
@@ -302,7 +356,7 @@ export const StyleSidebar: React.FC = () => {
 
           <div className="flex flex-col gap-1">
             <div className="flex justify-between text-xs font-mono tracking-wider font-bold uppercase text-neutral-400 select-none">
-              <span>英文字号</span>
+              <span>英文字号 (参考单位 / ASS)</span>
               <motion.span 
                 animate={{ scale: [1, 1.05, 1] }}
                 key={customStyle.enFontSize}
@@ -321,7 +375,7 @@ export const StyleSidebar: React.FC = () => {
 
           <div className="flex flex-col gap-1">
             <div className="flex justify-between text-xs font-mono tracking-wider font-bold uppercase text-neutral-400 select-none">
-              <span>垂直边距</span>
+              <span>垂直边距 (参考单位 / ASS)</span>
               <motion.span 
                 animate={{ scale: [1, 1.05, 1] }}
                 key={customStyle.marginV}
@@ -340,6 +394,24 @@ export const StyleSidebar: React.FC = () => {
               className="w-full glass-slider-input"
             />
           </div>
+        </div>
+
+        {/* 字体家族选择 - 阅片环境 CJK 协调核心 */}
+        <div className="flex flex-col mt-1 border-t border-white/[0.04] pt-2">
+          <span className="text-xs text-neutral-400 font-mono uppercase tracking-wider select-none pl-0.5 font-bold mb-1">字体家族 (阅片环境协调)</span>
+          
+          <FontFamilySelect 
+            label="中文字体" 
+            value={customStyle.zhFontFamily || FONT_FAMILIES_ZH[0].value} 
+            options={FONT_FAMILIES_ZH} 
+            onChange={(v) => handleStyleChange('zhFontFamily', v)} 
+          />
+          <FontFamilySelect 
+            label="英文字体" 
+            value={customStyle.enFontFamily || FONT_FAMILIES_EN[0].value} 
+            options={FONT_FAMILIES_EN} 
+            onChange={(v) => handleStyleChange('enFontFamily', v)} 
+          />
         </div>
 
         {/* Color pickers & resolution */}
@@ -387,7 +459,7 @@ export const StyleSidebar: React.FC = () => {
           </div>
         </div>
 
-        {/* Lyrics Styles (Foldable with Smooth Elastic motion) - auto hidden if no lyrics per audit */}
+        {/* Lyrics Styles */}
         {hasLyrics && (
         <div className="flex flex-col gap-2 pb-4">
           <div 
