@@ -44,19 +44,18 @@ export const TheaterStep: React.FC = () => {
     }
   };
 
-  // Ensure a default scene backdrop in 放映厅模式 so the preview always has visual "遮罩"/frame like NAS version
+  // 确保默认场景
   useEffect(() => {
     if (!sceneBackground || sceneBackground === 'solid') {
       setSceneBackground('cinema');
     }
   }, [sceneBackground, setSceneBackground]);
 
-  // Convert processedSubs to SubtitleDataSlot
+  // 转换数据格式
   const subtitleSlot: SubtitleDataSlot = processedSubs
     ? { status: 'ready', data: processedSubs }
     : { status: 'idle' };
 
-  // Convert background to BackdropSlot
   let backdropSlot: BackdropSlot;
   if (sceneBackground === 'cinema' && tmdbBackdrop) {
     backdropSlot = { type: 'tmdb', backdropUrl: tmdbBackdrop };
@@ -69,128 +68,60 @@ export const TheaterStep: React.FC = () => {
   return (
     <div className="flex-1 w-full h-full flex flex-col overflow-hidden relative bg-[#050507]">
       
-      {/* Symmetrical Top Navbar */}
+      {/* 顶部导航栏 */}
       <div className="flex justify-between items-center px-6 h-[52px] bg-[#030305]/40 backdrop-blur-md border-b border-white/[0.06] z-50 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <motion.button 
-              whileHover={{ scale: 1.03, y: -0.5 }}
-              whileTap={{ scale: 0.97 }}
-              className="p-2 glass-btn-ar rounded-lg flex items-center justify-center cursor-pointer text-neutral-400 hover:text-neutral-200"
-              onClick={handleBack}
-              title="返回工作台"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </motion.button>
-          </div>
+          <motion.button 
+            whileHover={{ scale: 1.03, y: -0.5 }}
+            whileTap={{ scale: 0.97 }}
+            className="p-2 glass-btn-ar rounded-lg flex items-center justify-center cursor-pointer text-neutral-400 hover:text-neutral-200"
+            onClick={handleBack}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </motion.button>
           
-          <div className="flex items-center gap-2 text-base tracking-widest font-mono font-bold text-neutral-400 uppercase">
-            <span>studio</span>
-            <span>//</span>
-            <span className="text-neutral-200 [text-shadow:0_0_8px_rgba(255,255,255,0.15)]">{isTemplateLab ? '模板实验室' : '放映厅模式'}</span>
+          <div>
+            <h2 className="text-xs font-mono font-bold text-neutral-450 tracking-wider">THEATER // 放映厅</h2>
+            <p className="text-[10px] text-violet-400 font-mono mt-0.5">
+              {theaterAspect} · {sceneBackground}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Style sidebar toggle */}
-          <motion.button 
-            whileHover={{ scale: 1.02, y: -0.5 }}
-            whileTap={{ scale: 0.98 }}
-            className={`py-2 px-4 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer
-              ${isSettingsOpen ? 'glass-btn-ar-active' : 'glass-btn-ar text-neutral-350 hover:text-white'}`}
+          <ControlDeck />
+          
+          <button 
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            title="样式配置选项"
+            className={`py-2 px-3.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer
+              ${isSettingsOpen ? 'glass-btn-ar-active' : 'glass-btn-ar text-neutral-350 hover:text-white'}`}
           >
-            <Sliders className="w-4 h-4" />
-            样式参数
-          </motion.button>
+            <Sliders className="w-3.5 h-3.5" />
+            样式
+          </button>
 
-          {/* Save to library */}
-          <motion.button 
-            whileHover={{ scale: 1.02, y: -0.5 }}
-            whileTap={{ scale: 0.98 }}
-            className="py-2 px-4.5 glass-btn-ar text-neutral-200 font-bold text-sm uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
-            onClick={saveToLibrary}
-          >
-            <Save className="w-4 h-4 text-violet-400" />
-            存入字幕库
-          </motion.button>
-
-          {/* Shared export dropdown */}
           <ExportDropdown variant="ghost" />
         </div>
       </div>
 
-      {/* Top settings bar (ControlDeck) - Fully separated from preview */}
-      <div className="w-full bg-[#030305]/60 backdrop-blur-sm border-b border-white/[0.06] py-2.5 px-6 z-45 flex-shrink-0 select-none">
-        <ControlDeck />
-      </div>
-
-      {/* Simulator canvas and sidebar overlays */}
-      <div className="flex-1 flex overflow-hidden min-h-0 relative">
-        <div className={`flex-1 flex flex-col min-w-0 relative pb-2 transition-all duration-300 ${isSettingsOpen ? 'lg:pr-[364px]' : 'pr-0'}`}>
-          
-          {/* Main simulator screen wrapped in defensive ErrorBoundary */}
-          <div className="flex-1 min-h-0 bg-[#050507] z-10 relative min-h-[380px] lg:min-h-[440px]">
-            <SimulatorBoundary>
-              <ScreenSimulator 
-                subtitle={subtitleSlot}
-                backdrop={backdropSlot}
-                style={customStyle}
-                previewIndex={previewIndex}
-                theaterAspect={theaterAspect}
-                guides={{ show: showGuides, temp: tempShowGuides }}
-                triggerTempGuides={triggerTempGuides}
-              />
-            </SimulatorBoundary>
-          </div>
-
-          {/* Bottom compact timeline slider (Non-absolute, sits under preview cleanly) */}
-          {processedSubs && processedSubs.length > 0 && (
-            <div className="w-[96%] max-w-5xl mx-auto z-30 glass-panel-ar rounded-2xl p-4 flex flex-row items-center gap-5 hover:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-all duration-300 mt-2 mb-4 flex-shrink-0">
-              
-              {/* Timeline Slider and Input indicator */}
-              <div className="flex-1 h-12 rounded-xl px-4 bg-white/[0.02] border border-white/[0.06] flex items-center relative group/slider">
-                <input 
-                  type="range" 
-                  min="0" 
-                  max={processedSubs.length - 1} 
-                  value={previewIndex} 
-                  onChange={e => setPreviewIndex(parseInt(e.target.value, 10))}
-                  className="w-full glass-slider-input cursor-pointer"
-                />
-              </div>
-              
-              <div className="flex items-center gap-3 flex-shrink-0 font-mono">
-                <span className="text-sm text-neutral-400 uppercase tracking-widest font-bold">行</span>
-                <input 
-                  type="number"
-                  min="1"
-                  max={processedSubs.length}
-                  value={previewIndex + 1}
-                  onChange={e => {
-                    const val = parseInt(e.target.value, 10);
-                    if (!isNaN(val)) {
-                      setPreviewIndex(Math.max(0, Math.min(val - 1, processedSubs.length - 1)));
-                    }
-                  }}
-                  className="bg-white/[0.03] border border-white/[0.08] text-violet-400 text-base rounded-lg py-1.5 px-3 w-20 outline-none focus:border-white/20 text-center font-bold font-mono"
-                  placeholder="1"
-                />
-                <div className="w-[1px] h-4.5 bg-white/[0.08]" />
-                <motion.span 
-                  key={percentVal}
-                  animate={{ scale: [1, 1.05, 1] }}
-                  className="text-violet-400 text-sm font-mono font-bold w-16 text-right [text-shadow:0_0_8px_rgba(168,85,247,0.35)]"
-                >
-                  {percentVal}%
-                </motion.span>
-              </div>
-            </div>
-          )}
+      {/* 主体内容 */}
+      <div className="flex-1 flex min-h-0 overflow-hidden relative">
+        {/* Theater 预览区域 */}
+        <div className="flex-1 flex items-center justify-center p-8 relative">
+          <SimulatorBoundary>
+            <ScreenSimulator
+              subtitle={subtitleSlot}
+              backdrop={backdropSlot}
+              style={customStyle}
+              previewIndex={previewIndex}
+              theaterAspect={theaterAspect}
+              guides={{ show: showGuides, temp: tempShowGuides }}
+              triggerTempGuides={triggerTempGuides}
+            />
+          </SimulatorBoundary>
         </div>
 
-        {/* Floating Style Drawer */}
+        {/* 样式侧边栏 */}
         <AnimatePresence>
           {isSettingsOpen && (
             <motion.div

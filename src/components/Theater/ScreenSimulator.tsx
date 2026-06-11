@@ -35,8 +35,11 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
   guides,
   triggerTempGuides
 }) => {
+  // 宽银幕特殊处理：2.39:1 和 1.9:1 需要 letterbox + TV 遮罩
+  const isWideAspect = theaterAspect === '2.39:1' || theaterAspect === '1.9:1';
+
   const activeSub = subtitle.status === 'ready' && subtitle.data ? subtitle.data[previewIndex] : null;
-  
+
   const scale = style.globalScale || 1.0;
   const zhSizeCqh = (style.zhFontSize * scale / 288) * 100;
   const enSizeCqh = (style.enFontSize * scale / 288) * 100;
@@ -101,12 +104,11 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
               style={{
                 fontSize: `${lyricEnSizeCqh}cqh`,
                 color: lyricColor,
-                fontWeight: 600,
+                fontWeight: 400,
                 fontStyle: lyricItalic ? 'italic' : 'normal',
                 textShadow: getOutlineShadow('#000000'),
-                lineHeight: 1.2,
-                transform: `scale(${style.enScale ? style.enScale / 100 : 0.9})`,
-                fontFamily: style.enFontFamily || 'Helvetica Neue, Arial, "Inter", sans-serif'
+                lineHeight: 1.25,
+                fontFamily: style.enFontFamily || 'Helvetica Neue, Arial, sans-serif'
               }}
             >
               {lyricEn}
@@ -114,46 +116,46 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
           )}
         </div>
       );
-
       if (lyricPosition === 'top') {
         topElement = lyricEl;
       } else {
         bottomElement = lyricEl;
       }
     } else {
+      // 普通字幕
       const parts = (activeSub.text || '').split('\n');
-      const zh = parts[0] || '';
-      const en = parts[1] || '';
-      bottomElement = (
+      const zhText = parts[0] || '';
+      const enText = parts[1] || '';
+      
+      topElement = (
         <div className="flex flex-col items-center">
-          {zh && (
+          {zhText && (
             <div 
               style={{
                 fontSize: `${zhSizeCqh}cqh`,
                 color: style.zhColor,
-                fontWeight: 700,
+                fontWeight: 600,
                 textShadow: getOutlineShadow(style.zhOutline),
                 lineHeight: 1.25,
                 fontFamily: style.zhFontFamily || 'system-ui, "PingFang SC", "Noto Sans SC", sans-serif'
               }}
             >
-              {zh}
+              {zhText}
             </div>
           )}
-          {en && (
+          {enText && (
             <div 
-              className="mt-1"
+              className="mt-0.5"
               style={{
                 fontSize: `${enSizeCqh}cqh`,
                 color: style.enColor,
-                fontWeight: 600,
-                textShadow: getOutlineShadow(style.enOutline || '#000000'),
+                fontWeight: 400,
+                textShadow: getOutlineShadow(style.enOutline),
                 lineHeight: 1.2,
-                transform: `scale(${style.enScale ? style.enScale / 100 : 0.9})`,
-                fontFamily: style.enFontFamily || 'Helvetica Neue, Arial, "Inter", sans-serif'
+                fontFamily: style.enFontFamily || 'Helvetica Neue, Arial, sans-serif'
               }}
             >
-              {en}
+              {enText}
             </div>
           )}
         </div>
@@ -161,167 +163,73 @@ export const ScreenSimulator: React.FC<ScreenSimulatorProps> = ({
     }
   }
 
+  // Backdrop 渲染
   const getBackdropStyle = () => {
-    const bgSize = 'cover';
-    
-    switch (backdrop.type) {
-      case 'solid':
-        return { backgroundColor: backdrop.color };
-      case 'preset':
-        if (backdrop.name === 'nature') {
-          return { backgroundImage: 'url("/scene_nature.png")', backgroundSize: bgSize, backgroundPosition: 'center' };
-        }
-        if (backdrop.name === 'night') {
-          return { backgroundImage: 'url("/scene_night.png")', backgroundSize: bgSize, backgroundPosition: 'center' };
-        }
-        return { backgroundImage: 'url("/scene_portrait.png")', backgroundSize: bgSize, backgroundPosition: 'center' };
-      case 'image':
-        return { backgroundImage: `url(${backdrop.url})`, backgroundSize: bgSize, backgroundPosition: 'center' };
-      case 'tmdb':
-        return { backgroundImage: `url(${backdrop.backdropUrl})`, backgroundSize: bgSize, backgroundPosition: 'center' };
-      default:
-        return { backgroundColor: '#09090d' };
+    if (backdrop.type === 'tmdb' && backdrop.backdropUrl) {
+      return {
+        backgroundImage: `url(${backdrop.backdropUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      };
     }
+    if (backdrop.type === 'preset') {
+      return {
+        backgroundImage: `url(/scene_${backdrop.name}.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      };
+    }
+    return {
+      backgroundColor: backdrop.type === 'solid' ? backdrop.color : '#0c0c10'
+    };
   };
 
-  const isCrt = theaterAspect === '4:3';
-  const isScope = theaterAspect === '2.39:1' || theaterAspect === '1.9:1';
-  const maskAspect = isCrt ? '1536/1288' : '1725/1058';
-  const maskImg = isCrt ? '/tv-crt_v2.png' : '/tv-modern_v2.png';
-
-  // These % are calibrated to the native PNG glass area.
-  // They assume the mask image is rendered without stretch (object-contain).
-  const screenPos = isCrt 
-      ? { left: '10.8073%', top: '11.4907%', width: '78.3854%', height: '71.0404%' }
-      : { left: '1.6812%', top: '3.8752%', width: '96.0000%', height: '90.3592%' };
-
-  const innerAspect = theaterAspect === '16:9' ? '16/9' : 
-                      theaterAspect === '4:3' ? '4/3' : 
-                      theaterAspect === '1.9:1' ? '1.9/1' : '2.39/1';
-
-  const getBlackBarCenterCqh = () => {
-    const physAspect = isCrt ? (4/3) : (16/9);
-    let movieAspectNum = 16/9;
-    if (theaterAspect === '4:3') movieAspectNum = 4/3;
-    else if (theaterAspect === '1.9:1') movieAspectNum = 1.9;
-    else if (theaterAspect === '2.39:1') movieAspectNum = 2.39;
-
-    if (movieAspectNum > physAspect) {
-      const movieHeightPct = physAspect / movieAspectNum;
-      const blackBarHeightPct = (1 - movieHeightPct) / 2;
-      return (blackBarHeightPct / 2) * 100;
-    }
-    return 0;
-  };
-
-  const targetCqh = getBlackBarCenterCqh();
-  const isMagnetic = targetCqh > 0 && Math.abs(paddingBottomCqh - targetCqh) < 1.0;
+  const backdropStyle = getBackdropStyle();
 
   return (
-    <div 
-      className="flex-1 flex justify-center items-center bg-[#050507] w-full h-full overflow-hidden p-4 md:p-8 relative"
-      onMouseEnter={triggerTempGuides}
-      onMouseMove={triggerTempGuides}
-    >
-      {/* 空间极光氛围呼吸光晕 */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
-        <div className="absolute top-[20%] left-[20%] w-[55%] h-[55%] rounded-full bg-aurora-glow-purple" />
-        <div className="absolute bottom-[20%] right-[20%] w-[45%] h-[45%] rounded-full bg-aurora-glow-emerald" />
-      </div>
-
-      {/* TV Frame + 真实阅片环境模拟
-          关键修复：
-          - 外层不再用 aspectRatio 强制拉伸 PNG（避免 bezel 变形）
-          - img 使用 object-contain 保持 PNG 原始比例（真实电视外形）
-          - screenPos % 现在相对于未拉伸的图像，更准确对应玻璃区域
-          - 内部视频窗口严格使用选择的 innerAspect（16:9 / 2.39:1 等）
-          - 字幕 cqh 基于正确的内部画面区域
-      */}
+    <div className="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
+      {/* 背景层 */}
       <div 
-        className="relative fade-in-up border border-white/[0.06] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.5)] z-10"
-        style={{ 
-          maxWidth: 'min(100%, 860px)', 
-          maxHeight: 'min(100%, 560px)',
-          width: 'fit-content',
-          height: 'fit-content'
-        }}
-      >
-        {/* 电视遮罩 PNG - 保持原始比例，不拉伸 */}
-        <img 
-          src={maskImg} 
-          className="block w-auto h-auto max-w-full max-h-full object-contain pointer-events-none z-20 drop-shadow-2xl" 
-          alt="TV Frame" 
-        />
+        className="absolute inset-0"
+        style={backdropStyle}
+      />
 
-        {/* TV 玻璃显示区域（黑色底 + 内容） */}
+      {/* TV 遮罩层（模拟家庭观影环境） */}
+      <div className="relative w-full h-full flex items-center justify-center z-10">
         <div 
-          className="absolute overflow-hidden z-10"
+          className={`relative overflow-hidden ${isWideAspect ? 'w-[92%] h-[82%]' : 'w-[88%] h-[88%]'}`}
           style={{
-            left: screenPos.left,
-            top: screenPos.top,
-            width: screenPos.width,
-            height: screenPos.height,
-            backgroundColor: '#000'
+            aspectRatio: theaterAspect === '2.39:1' ? '2.39/1' : 
+                        theaterAspect === '1.9:1' ? '1.9/1' : 
+                        theaterAspect === '16:9' ? '16/9' : '4/3',
+            maxWidth: '100%',
+            maxHeight: '100%'
           }}
         >
-          {/* 内部视频画面 - 严格按照选择的画幅比例 (theaterAspect) */}
-          <div 
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ backgroundColor: 'transparent' }}
-          >
-            <div 
-              className="relative overflow-hidden border border-white/30"
-              style={{ 
-                aspectRatio: innerAspect, 
-                width: '100%', 
-                maxWidth: '100%', 
-                maxHeight: '100%',
-                backgroundColor: '#000',
-                ...getBackdropStyle()
-              }}
-            >
-              {/* States inside the active video area */}
-              {subtitle.status === 'idle' && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 select-none">
-                  <span className="text-white/20 text-xs font-mono tracking-widest uppercase">[ Empty Canvas ]</span>
-                </div>
-              )}
-              {subtitle.status === 'loading' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/60 backdrop-blur-xs">
-                  <div className="w-6 h-6 border-2 border-accent-neon border-t-transparent rounded-full animate-spin mb-3" />
-                  <span className="text-white/40 text-xs font-mono tracking-widest uppercase">{subtitle.progress ? `Loading ${Math.round(subtitle.progress * 100)}%` : 'Loading Subtitles...'}</span>
-                </div>
-              )}
-              {subtitle.status === 'error' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-30 select-none bg-black/85">
-                  <span className="text-rose-500/80 text-xs font-mono tracking-widest uppercase mb-1">[ Data Error ]</span>
-                  <span className="text-white/40 text-[0.625rem] font-mono tracking-wide px-4 text-center max-w-xs break-words">{subtitle.message}</span>
-                </div>
-              )}
-
-              {/* Subtitle layers — constrained to the chosen aspect video window */}
-              {topElement && (
-                <div className="absolute left-[5%] right-[5%] flex flex-col items-center justify-start text-center pointer-events-none select-none z-40 transition-all duration-200" style={{ top: `${paddingBottomCqh * 0.8}cqh` }}>
-                  {topElement}
-                </div>
-              )}
-              {bottomElement && (
-                <div className="absolute left-[5%] right-[5%] flex flex-col items-center justify-end text-center pointer-events-none select-none z-40 transition-all duration-200" style={{ bottom: `${paddingBottomCqh}cqh` }}>
-                  {bottomElement}
-                </div>
-              )}
-
-              {/* Alignment guides inside the video area */}
-              <div className="absolute left-0 right-0 z-40 transition-all duration-300 pointer-events-none flex items-center" style={{ bottom: `${paddingBottomCqh}cqh`, opacity: (guides.show || guides.temp) ? 1 : 0, borderBottom: `1px dashed ${isMagnetic ? '#10b981' : 'rgba(168,85,247,0.45)'}`, boxShadow: isMagnetic ? '0 0 10px #10b981, 0 0 4px #10b981' : 'none', transform: 'scaleY(0.5)', transformOrigin: 'bottom' }}>
-                {isMagnetic && <div className="absolute right-4 -top-3.5 text-[0.5625rem] text-[#10b981]/90 font-mono tracking-[0.2em] uppercase bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(16,185,129,0.5)] scale-y-200">MAGNETIC ALIGNED</div>}
+          {/* 内容区域 */}
+          <div className="absolute inset-0 flex flex-col justify-end items-center pb-[8%] px-8">
+            {topElement && (
+              <div className="mb-auto pt-[15%]">
+                {topElement}
               </div>
-              {targetCqh > 0 && (
-                <div className="absolute left-0 right-0 z-30 transition-all duration-300 pointer-events-none" style={{ bottom: `${targetCqh}cqh`, opacity: (guides.show || guides.temp) && !isMagnetic ? 1 : 0, borderBottom: '1px solid rgba(255,255,255,0.08)', transform: 'scaleY(0.5)', transformOrigin: 'bottom' }} />
-              )}
-            </div>
+            )}
+            {bottomElement && (
+              <div className="mt-auto pb-[8%]">
+                {bottomElement}
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* 引导线 */}
+      {guides.show && (
+        <div className="absolute inset-0 z-20 pointer-events-none">
+          <div className="v9-canvas-guide-line" style={{ top: '33%' }} />
+          <div className="v9-canvas-guide-line" style={{ top: '66%' }} />
+        </div>
+      )}
     </div>
   );
 };
