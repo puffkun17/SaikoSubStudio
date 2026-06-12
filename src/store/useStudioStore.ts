@@ -282,6 +282,26 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       jumpLineVal: String(nextPreview + 1)
     });
   },
+
+  // 支持直接修改字幕文本（从 NAS 成熟版本迁移 + 改进）
+  updateSubtitleText: (index: number, text: string) => {
+    const { processedSubs, previewIndex, addLog } = get();
+    if (!processedSubs) {
+      addLog("无法修改字幕：processedSubs 为空", "error");
+      return;
+    }
+
+    const updated = processedSubs.map(s => 
+      s.index === index ? { ...s, text } : s
+    );
+
+    // 如果修改的是当前预览的字幕，记录日志
+    if (index - 1 === previewIndex) {
+      addLog(`已更新第 ${index} 行字幕内容`, "success");
+    }
+
+    set({ processedSubs: updated });
+  },
   setShowAllSubs: (showAllSubs) => set({ showAllSubs }),
   setShowAssHint: (showAssHint) => set({ showAssHint }),
   setTasks: (tasks) => set(state => {
