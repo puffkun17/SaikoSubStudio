@@ -266,7 +266,22 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   setTmdbSuggestions: (tmdbSuggestions) => set({ tmdbSuggestions }),
   setSelectedSuggestion: (selectedSuggestion) => set({ selectedSuggestion }),
   setIsSettingsOpen: (isSettingsOpen) => set({ isSettingsOpen }),
-  setProcessedSubs: (processedSubs) => set({ processedSubs }),
+  setProcessedSubs: (processedSubs) => {
+    const currentPreview = get().previewIndex;
+    let nextPreview = currentPreview;
+
+    if (!processedSubs || processedSubs.length === 0) {
+      nextPreview = 0;
+    } else if (currentPreview < 0 || currentPreview >= processedSubs.length) {
+      nextPreview = 0;
+    }
+
+    set({ 
+      processedSubs, 
+      previewIndex: nextPreview,
+      jumpLineVal: String(nextPreview + 1)
+    });
+  },
   setShowAllSubs: (showAllSubs) => set({ showAllSubs }),
   setShowAssHint: (showAssHint) => set({ showAssHint }),
   setTasks: (tasks) => set(state => {
